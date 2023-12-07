@@ -6,14 +6,13 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#1976d2',
+      main: '#7fbf7f',
     },
     secondary: {
       main: '#f50057',
     },
   },
-})
-
+});
 
 const ThemeContextProvider = (props) => {
   const {

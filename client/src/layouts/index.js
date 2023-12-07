@@ -2,6 +2,7 @@
 import { Fragment } from 'react'
 import { Outlet } from 'react-router-dom'
 
+
 // ** Custom Components
 import Navbar from './Navbar'
 import Footer from './Footer'

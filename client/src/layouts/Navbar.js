@@ -1,4 +1,3 @@
-import * as React from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -16,7 +15,11 @@ import MailIcon from "@mui/icons-material/Mail";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { Link } from "react-router-dom";
-import AdbIcon from "@mui/icons-material/Adb";
+import { useState, useEffect } from "react";
+import { Button } from "@mui/material";
+import { isUserLoggedIn, clearToken } from "../utility/utils";
+import HomeIcon from "@mui/icons-material/Home";
+import { fetchMe } from "../utility/api";
 
 const StyledButtonLink = styled(Link)(({ theme }) => ({
   //make navbar buttons look more like buttons rather than just text
@@ -34,7 +37,8 @@ const StyledButtonLink = styled(Link)(({ theme }) => ({
   },
 }));
 
-const Search = styled("div")(({ theme }) => ({//searchbar
+const Search = styled("div")(({ theme }) => ({
+  //searchbar
   position: "relative",
   borderRadius: theme.shape.borderRadius,
   backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -50,7 +54,8 @@ const Search = styled("div")(({ theme }) => ({//searchbar
   },
 }));
 
-const SearchIconWrapper = styled("div")(({ theme }) => ({//wrapper for searchIcon
+const SearchIconWrapper = styled("div")(({ theme }) => ({
+  //wrapper for searchIcon
   padding: theme.spacing(0, 2),
   height: "100%",
   position: "absolute",
@@ -60,7 +65,8 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({//wrapper for searchIco
   justifyContent: "center",
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({//styling
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  //styling
   color: "inherit",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
@@ -76,11 +82,24 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({//styling
 
 export default function Navbar() {
   // material UI component
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn()); // usestate for loggedIn or not
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    // check if user is logged in
+    if (isLoggedIn) {
+      // fetch user's id using user token
+      fetchMe().then((result) => {
+        console.log("fetchMe: ", result);
+        // set user id state variable with the user id from the fetch request
+        setUserId(result.data.id);
+      });
+    }
+  }, []);
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -93,6 +112,11 @@ export default function Navbar() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
+  };
+  const handleLogout = () => {
+    //logout function
+    setIsLoggedIn(false);
+    clearToken()
   };
 
   const menuId = "primary-search-account-menu";
@@ -112,8 +136,25 @@ export default function Navbar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem
+        component={Link}
+        to={`/profile/${userId}`}
+        onClick={handleMenuClose}
+      >
+        Profile
+      </MenuItem>
+      <MenuItem component={Link} to={`/collection`} onClick={handleMenuClose}>
+        My Collection
+      </MenuItem>
+      {/* Logout Button */}
+      <MenuItem
+        onClick={() => {
+          handleLogout();
+          handleMenuClose();
+        }}
+      >
+        Logout
+      </MenuItem>
     </Menu>
   );
 
@@ -153,44 +194,9 @@ export default function Navbar() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          {/* <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton> */}
-
-          <StyledButtonLink to={"/collection"}>
+          <StyledButtonLink to={"/"}>
             <Typography variant="h6" noWrap>
-              Collection
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/cardsCatalogue"}>
-            <Typography variant="h6" noWrap>
-              Cards Catalogue
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/decks"}>
-            <Typography variant="h6" noWrap>
-              Decks
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/guides"}>
-            <Typography variant="h6" noWrap>
-              Guides
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/rules"}>
-            <Typography variant="h6" noWrap>
-              Rules
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/news"}>
-            <Typography variant="h6" noWrap>
-              News
+              <HomeIcon sx={{ fontSize: 25 }} />
             </Typography>
           </StyledButtonLink>
           <Search>
@@ -202,23 +208,30 @@ export default function Navbar() {
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <IconButton
-              size="large"
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
-          </Box>
+          <Box sx={{ flexGrow: 1 }} /> 
+          {!isLoggedIn ? (
+            <StyledButtonLink to={"/login"}>
+              <Typography variant="h6" noWrap>
+                Login/Register``
+              </Typography>
+            </StyledButtonLink>
+          ) : (
+            <Box sx={{ display: { xs: "none", md: "flex" } }}>
+              <IconButton
+                size="large"
+                edge="end"
+                aria-label="account of current user"
+                aria-controls={menuId}
+                aria-haspopup="true"
+                onClick={handleProfileMenuOpen}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
-      {renderMobileMenu}
       {renderMenu}
     </Box>
   );

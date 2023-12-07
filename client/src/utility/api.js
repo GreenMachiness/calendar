@@ -98,3 +98,25 @@ export const getAllUsers = async({page, limit}) => {
 
   return responseData
 }
+
+export const fetchMe = async () => {
+  const token = getToken();
+  if (!token) {
+    throw new Error(`Missing User Token`);
+  }
+
+  const response = await fetch(`${baseUrl}/users/me`, {
+    method: "GET",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`, // Token is required for protected Routes
+    }),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(`Status Code: ${response?.status} - ${responseData?.message}`);
+  }
+
+  return responseData;
+};

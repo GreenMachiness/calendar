@@ -1,12 +1,14 @@
-// ** Material UI
-import { Box } from '@mui/material'
+import React from 'react'
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 
-function Home (props) {
-  return (
-    <Box>
-      Home
-    </Box>
-  )
+export default class DemoApp extends React.Component {
+  render() {
+    return (
+      <FullCalendar
+        plugins={[ dayGridPlugin ]}
+        initialView="dayGridMonth"
+      />
+    )
+  }
 }
-
-export default Home
