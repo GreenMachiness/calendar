@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 function Footer(props) {
   return (
     <Box>
-Footer
+© EAZ. All rights reserved. Transforming futures through code.
     </Box>
   );
 }

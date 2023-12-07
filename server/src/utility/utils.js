@@ -17,3 +17,9 @@ exports.checkConfig = () => {
   console.log('All Environment Variables Configured!')
   console.log('******************')
 }
+
+exports.chunk = (arr, size) => {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => {
+    return arr.slice(i * size, i * size + size)
+  })
+}

@@ -2,7 +2,7 @@
 const { Router } = require('express')
 
 // ** controllers
-const {showAll, register, login, showById, updateById, destroyById} = require('./controller')
+const {showAll, register, login, showById, updateById, destroyById, showMe} = require('./controller')
 
 // ** middleware
 const { authenticate } = require('../../middleware/auth')
@@ -49,6 +49,10 @@ router.post('/register', register)
  */
 
 router.post('/login', login)
+
+
+router.get('/me', authenticate, showMe)
+
 
 /**
  * Retrieves a user by their ID.
