@@ -194,51 +194,11 @@ export default function Navbar() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          {/* <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton> */}
           <StyledButtonLink to={"/"}>
             <Typography variant="h6" noWrap>
               <HomeIcon sx={{ fontSize: 25 }} />
             </Typography>
           </StyledButtonLink>
-          <StyledButtonLink to={"/collection"}>
-            <Typography variant="h6" noWrap>
-              Collection
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/cardsCatalogue"}>
-            <Typography variant="h6" noWrap>
-              Cards Catalogue
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/decks"}>
-            <Typography variant="h6" noWrap>
-              Decks
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/guides"}>
-            <Typography variant="h6" noWrap>
-              Guides
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/rules"}>
-            <Typography variant="h6" noWrap>
-              Rules
-            </Typography>
-          </StyledButtonLink>
-          <StyledButtonLink to={"/news"}>
-            <Typography variant="h6" noWrap>
-              News
-            </Typography>
-          </StyledButtonLink>
-          <Box sx={{ flexGrow: 1 }} />{" "}
           <Search>
             <SearchIconWrapper>
               <SearchIcon />
@@ -248,14 +208,14 @@ export default function Navbar() {
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
-          {!isLoggedIn ? ( //render login/register button when logged out
+          <Box sx={{ flexGrow: 1 }} /> {/* Empty box to push content to the right */}
+          {!isLoggedIn ? (
             <StyledButtonLink to={"/login"}>
               <Typography variant="h6" noWrap>
-                Login/Register
+                Login/Register``
               </Typography>
             </StyledButtonLink>
           ) : (
-            // render accountcircle when logged in
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               <IconButton
                 size="large"
