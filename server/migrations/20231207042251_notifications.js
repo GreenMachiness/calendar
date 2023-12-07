@@ -8,7 +8,8 @@ exports.up = function(knex) {
         table.integer('duration').notNullable();
         table.enu('unit', ['days', 'weeks', 'months', "years"]).notNullable();
         table.integer('taskId').references('id').inTable('tasks').notNullable().onDelete('CASCADE')
-        table.timestamps.notNullable()
+        table.timestamps(['true'], ['true'], ['true'])
+
       })
     }
     

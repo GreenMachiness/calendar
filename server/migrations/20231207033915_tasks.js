@@ -12,8 +12,8 @@ exports.up = function(knex) {
         table.time('timeEnd').unique();
         table.enu('priorityLevel', ['Urgent', 'Important', 'Optional'])
         table.text('notes') 
-        table.integer('userId').notNullable().onDelete('CASCADE')
-        table.timestamps.notNullable()
+        table.integer('userId').references('id').inTable('users').notNullable().onDelete('CASCADE')
+        table.timestamps(['true'], ['true'], ['true'])
       })
     }
     
