@@ -95,7 +95,7 @@ function Login() {
         <Button variant="contained" onClick={handleClick}>
           Login
         </Button>
-        <Link to="./register" style={{ textDecoration: "none" }}>
+        <Link to="/register" style={{ textDecoration: "none" }}>
           <Button
             variant="contained"
             style={{ backgroundColor: "purple", color: "white" }}

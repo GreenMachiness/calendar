@@ -212,7 +212,7 @@ export default function Navbar() {
           {!isLoggedIn ? (
             <StyledButtonLink to={"/login"}>
               <Typography variant="h6" noWrap>
-                Login/Register``
+                Login/Register
               </Typography>
             </StyledButtonLink>
           ) : (

@@ -7,7 +7,8 @@ import { register } from "../../utility/api";
 
 function Register(props) {
   const navigate = useNavigate(); // navigate to homepage
-  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [openSuccessSnackbar, setOpenSuccessSnackbar] = useState(false); // need setstate for Success Snackbar
@@ -16,7 +17,8 @@ function Register(props) {
   const handleClick = async () => {
     // collect form input data
     const formData = {
-      username,
+      firstName,
+      lastName,
       email,
       password,
     };
@@ -52,13 +54,21 @@ function Register(props) {
         flexDirection={"column"}
         rowGap={2}
       >
-        {/* username */}
+        {/* firstname */}
         <TextField
-          id="username_field"
-          label="User Name"
+          id="firstName_field"
+          label="First Name"
           variant="filled"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+        />
+        {/* lastName */}
+        <TextField
+          id="lastName_field"
+          label="Last Name"
+          variant="filled"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
         />
         {/* email */}
         <TextField

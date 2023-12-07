@@ -9,6 +9,7 @@ exports.up = function(knex) {
       table.string('lastName').notNullable();
       table.string('email').unique().notNullable();
       table.string('password').unique().notNullable();
+      table.enum('role', ['admin', 'user']).defaultTo('user').notNullable()
       table.timestamps(['true'], ['true'], ['true'])
 
     })
