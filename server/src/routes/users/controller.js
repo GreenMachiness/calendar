@@ -3,7 +3,7 @@ require('dotenv').config()
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
-const { findAll, findById, findByUsername, insert, deleteById } = require('./service')
+const { findAll, findById, findByEmail, insert, deleteById } = require('./service')
 
 exports.showAll = async (req, res) => {
   try {
@@ -169,32 +169,32 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     // get credentials from header
-    // A valid Auth header for username + password should look like:
+    // A valid Auth header for email + password should look like:
       // "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
     const authHeader = req.headers.authorization
     // console.log(authHeader)
     // check if auth header is missing 
-    // or if auth header does not Basic type (username + password)
+    // or if auth header does not Basic type (email + password)
     if (!authHeader || !authHeader.startsWith('Basic ')) {
       return res.status(401).json({ message: 'Invalid authorization header' })
     }
     // remove "Basic" from the start of the header
     // decode the base64 string to text
-      // "dXNlcm5hbWU6cGFzc3dvcmQ=" turns into "username:password"
+      // "dXNlcm5hbWU6cGFzc3dvcmQ=" turns into "email:password"
     // split the string into an array at the ":"
     const credentials = Buffer.from(authHeader.slice(6), 'base64').toString().split(':')
     // console.log(credentials)
     // destructure credentials array
-    const [username, password] = credentials 
+    const [email, password] = credentials 
 
-    // get the user with the provided username
-    const user = await findByUsername(username)
+    // get the user with the provided email
+    const user = await findByEmail(email)
     // console.log(user)
     // bcrypt.compare takes the plain-text password and re-hashes 
       // then compares to the hash in the database
     if (!user || !await bcrypt.compare(password, user.password)) {
       // If the user isn't found or the password is incorrect, return an error
-      return res.status(401).json({ message: 'Invalid username or password' })
+      return res.status(401).json({ message: 'Invalid email or password' })
     }
 
     // Create a JWT, with the payload {id: user.id}, 

@@ -24,10 +24,10 @@ exports.findById = async (id) => {
   return user
 }
 
-exports.findByUsername = async (username) => {
-  // Find the first user in the database with the username
+exports.findByEmail = async (email) => {
+  // Find the first user in the database with the email
 const user = await knex('users')
-  .where('username', username)
+  .where('email', email)
   .first('*')
 
 return user
@@ -36,7 +36,7 @@ return user
 exports.insert = async (data) => {
   // create user in database
 
-  // destructure username and password
+  // destructure email and password
   const {email, password} = data
 
   // Hash the password with 10 rounds of salt

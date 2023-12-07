@@ -3,12 +3,12 @@ import { getToken } from "./utils"
 const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:9000'
 
 /**
- * Sends a login request to the api for a user with the provided username and password.
+ * Sends a login request to the api for a user with the provided email and password.
  *
  * @async
  * @function
  * @param {Object} data - An object containing the user's login credentials.
- * @param {string} data.username - The user's username.
+ * @param {string} data.email - The user's email.
  * @param {string} data.password - The user's password.
  * @returns {Promise<Object>} - A promise that resolves with the user's data.
  * @throws {Error} - Throws an error if there was an issue with the login request.
@@ -16,14 +16,14 @@ const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:9000'
 export const login = async (data) => {
   
   const {
-    username,
+    email,
     password
   } = data
 
   const response = await fetch(`${baseUrl}/users/login`, {
     method: "POST",
     headers: new Headers({
-      "Authorization": `Basic ${btoa(`${username}:${password}`)}` //btoa is only deprecated in Node.js not in browser environments!
+      "Authorization": `Basic ${btoa(`${email}:${password}`)}` //btoa is only deprecated in Node.js not in browser environments!
     }),
   })
 
@@ -42,7 +42,7 @@ export const login = async (data) => {
  * @async
  * @function
  * @param {Object} data - An object containing the user's data require to create an account.
- * @param {string} data.username - The user's username
+ * @param {string} data.email - The user's email
  * @param {string} data.password - The user's password  
  * @param {*} data.[...] - Any additional user data required for account creation
  * @returns {Promise<Object>} - A promise that resolves with the user's data.
