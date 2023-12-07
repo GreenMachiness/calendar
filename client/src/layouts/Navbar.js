@@ -208,7 +208,7 @@ export default function Navbar() {
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
-          <Box sx={{ flexGrow: 1 }} /> {/* Empty box to push content to the right */}
+          <Box sx={{ flexGrow: 1 }} /> 
           {!isLoggedIn ? (
             <StyledButtonLink to={"/login"}>
               <Typography variant="h6" noWrap>
