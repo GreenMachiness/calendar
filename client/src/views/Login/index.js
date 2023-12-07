@@ -12,7 +12,7 @@ import { login } from "../../utility/api";
 import { setToken } from "../../utility/utils";
 
 function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false); // state for success snackbar
@@ -31,7 +31,7 @@ function Login() {
   const handleClick = async () => {
     // collect form input data
     const formData = {
-      username,
+      email,
       password,
     };
 
@@ -78,11 +78,11 @@ function Login() {
         </Typography>
         <TextField
           id="filled-basic"
-          label="Username"
+          label="E-mail"
           variant="filled"
           type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
           id="login-password"
