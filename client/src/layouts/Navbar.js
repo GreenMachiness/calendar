@@ -5,18 +5,12 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
-import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import MailIcon from "@mui/icons-material/Mail";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import MoreIcon from "@mui/icons-material/MoreVert";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Button } from "@mui/material";
 import { isUserLoggedIn, clearToken } from "../utility/utils";
 import HomeIcon from "@mui/icons-material/Home";
 import { fetchMe } from "../utility/api";
@@ -88,6 +82,7 @@ export default function Navbar() {
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const [userId, setUserId] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     // check if user is logged in
@@ -97,6 +92,8 @@ export default function Navbar() {
         console.log("fetchMe: ", result);
         // set user id state variable with the user id from the fetch request
         setUserId(result.data.id);
+        console.log("result.data:", result.data);
+        setUser(result.data);
       });
     }
   }, []);
@@ -116,7 +113,7 @@ export default function Navbar() {
   const handleLogout = () => {
     //logout function
     setIsLoggedIn(false);
-    clearToken()
+    clearToken();
   };
 
   const menuId = "primary-search-account-menu";
@@ -144,7 +141,7 @@ export default function Navbar() {
         Profile
       </MenuItem>
       <MenuItem component={Link} to={`/collection`} onClick={handleMenuClose}>
-        My Collection
+        My Tasks
       </MenuItem>
       {/* Logout Button */}
       <MenuItem
@@ -208,7 +205,7 @@ export default function Navbar() {
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
-          <Box sx={{ flexGrow: 1 }} /> 
+          <Box sx={{ flexGrow: 1 }} />
           {!isLoggedIn ? (
             <StyledButtonLink to={"/login"}>
               <Typography variant="h6" noWrap>
@@ -216,7 +213,17 @@ export default function Navbar() {
               </Typography>
             </StyledButtonLink>
           ) : (
-            <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center", // make name and account circle centered
+              }}
+            >
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="h6" noWrap>
+                  {user && `Welcome, ${user.firstName} ${user.lastName}`}
+                </Typography>
+              </Box>
               <IconButton
                 size="large"
                 edge="end"
