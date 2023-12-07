@@ -6,20 +6,21 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 function Calendar() {
   return (
-    <div>
-      <br></br>
+    <div style={{ maxWidth: "90vh", margin: "0 auto" }}>
+      <br />
       <Fullcalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView={"dayGridMonth"}
-        headerToolbar={{ // these can be interchanged
-          start: "today prev,next", //selection tools
-          center: "title", // month in the center
-          end: "dayGridMonth,timeGridWeek,timeGridDay", // will give view buttons for month/week/day
+        headerToolbar={{
+          start: "today prev,next",
+          center: "title",
+          end: "dayGridMonth,timeGridWeek,timeGridDay",
         }}
-        height={"90vh"}
+        height={"90vh"} // Adjust the height as needed
       />
     </div>
   );
 }
+
 
 export default Calendar;
