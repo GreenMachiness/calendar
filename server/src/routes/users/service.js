@@ -37,7 +37,7 @@ exports.insert = async (data) => {
   // create user in database
 
   // destructure username and password
-  const {username, password} = data
+  const {email, password} = data
 
   // Hash the password with 10 rounds of salt
   const hash = await bcrypt.hash(password, 10)
@@ -48,9 +48,9 @@ exports.insert = async (data) => {
   // Insert the user into the database and return
   const result = await knex('users').insert({
     ...data,
-    username: username,
+    email: email,
     password: hash //store the hash. DO NOT store a plaintext password!
-  }).returning(['id', 'username', 'role']) // return the data you need excluding the password
+  }).returning(['id', 'email', 'role']) // return the data you need excluding the password
   
   return result
 }
