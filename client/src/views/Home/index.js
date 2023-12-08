@@ -6,7 +6,8 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 function Calendar() {
   return (
-    <div style={{ maxWidth: "90vh", margin: "0 auto" }}>
+    // need a way to stop the calendar touching the edges of the site
+    <div style={{ maxWidth: "90vh", margin: "0 auto" }}> 
       <br />
       <Fullcalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -16,7 +17,7 @@ function Calendar() {
           center: "title",
           end: "dayGridMonth,timeGridWeek,timeGridDay",
         }}
-        height={"90vh"} // Adjust the height as needed
+        height={"90vh"}
       />
     </div>
   );
