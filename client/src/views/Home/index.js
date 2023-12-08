@@ -11,7 +11,7 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Slide from '@mui/material/Slide';
 
-function MyCalendar() {
+function Calendar() {
   // want to get the current date 
   // get rid of time.
   const currentDate = new Date().toISOString().split("T")[0];
@@ -100,4 +100,4 @@ function MyCalendar() {
   );
 }
 
-export default MyCalendar;
+export default Calendar;
