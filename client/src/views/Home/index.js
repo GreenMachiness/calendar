@@ -1,14 +1,26 @@
-import React from 'react'
-import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
+import React from "react";
+import Fullcalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
 
-export default class DemoApp extends React.Component {
-  render() {
-    return (
-      <FullCalendar
-        plugins={[ dayGridPlugin ]}
-        initialView="dayGridMonth"
+function Calendar() {
+  return (
+    <div style={{ maxWidth: "90vh", margin: "0 auto" }}>
+      <br />
+      <Fullcalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView={"dayGridMonth"}
+        headerToolbar={{
+          start: "today prev,next",
+          center: "title",
+          end: "dayGridMonth,timeGridWeek,timeGridDay",
+        }}
+        height={"90vh"} // Adjust the height as needed
       />
-    )
-  }
+    </div>
+  );
 }
+
+
+export default Calendar;
