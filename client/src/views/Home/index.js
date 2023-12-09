@@ -41,9 +41,9 @@ function Calendar() {
   }
 
   const priorityColors = {
-    optional: "blue", // Assign a color for 'optional' priority
-    important: "green", // Assign a color for 'important' priority
-    urgent: "red", // Assign a color for 'urgent' priority
+    optional: "blue",
+    important: "green",
+    urgent: "red",
   };
 
   // need tasks to render into my calendar to see if it works
@@ -52,7 +52,7 @@ function Calendar() {
     {
       title: "Change Brush",
       date: "2023-12-28",
-      color: priorityColors.urgent, // Use the color from your priorityColors object
+      color: priorityColors.urgent, // use the color from your priorityColors object
     },
   ]);
 
@@ -98,6 +98,29 @@ function Calendar() {
     setRepetitionUnit(e.target.value);
   };
 
+  // need a function to handle clicking on an event/task in the calendar
+  const handleEventClick = (clickInfo) => {
+    const clickedEvent = clickInfo.event;
+
+    // get the details of the clicked event
+    const clickedTask = {
+      title: clickedEvent.title,
+      start: clickedEvent.startStr,
+      end: clickedEvent.endStr || taskEndDate, // If end doesn't exist, use taskEndDate
+      isAllDay: clickedEvent.allDay,
+      color: clickedEvent.backgroundColor,
+    };
+
+    // render the form fields with the details of the clicked task
+    setTaskTitle(clickedTask.title);
+    setTaskStartDate(clickedTask.start.slice(0, 10));
+    setTaskEndDate(clickedTask.end.slice(0, 10));
+    setIsAllDay(clickedTask.isAllDay);
+
+    // open the form with the task details
+    setShowForm(true);
+  };
+
   // need a function when clicking on a calendar date, it would bring up the form for that current date
   const openFormOnDate = (date) => {
     // set show form to render form
@@ -140,14 +163,29 @@ function Calendar() {
     const newTask = {
       title: taskTitle,
       start: `${taskStartDate}T${taskStartTime}`,
-      end: taskEndDate,
+      end: `${taskEndDate}T${taskEndTime}`,
       allDay: isAllDay,
       color: priorityColors[priority], //change color depending on priority
       eventColor: priorityColors[priority],
     };
 
-    // update the events with the new task
-    setTasks([...tasks, newTask, ...generateRepeatedTasks()]);
+    // update the events with an existing task
+    const taskExists = tasks.some(
+      (task) => task.title === taskTitle && task.start === newTask.start
+    );
+
+    if (taskExists) {
+      // update the existing task
+      const updatedTasks = tasks.map((task) =>
+        task.title === taskTitle && task.start === newTask.start
+          ? newTask
+          : task
+      );
+      setTasks(updatedTasks);
+    } else {
+      //render current tasks
+      setTasks([...tasks, newTask, ...generateRepeatedTasks()]);
+    }
 
     setShowForm(false);
     setTaskTitle("");
@@ -155,7 +193,6 @@ function Calendar() {
     setTaskEndDate(currentDate);
     setIsAllDay(false);
   };
-
   // CSS for cursor on calendar
   const clickCursor = `
     .fc-daygrid-day, .fc-timegrid-slot {
@@ -343,26 +380,24 @@ function Calendar() {
           }}
           events={tasks}
           dateClick={(info) => openFormOnDate(info.dateStr)}
+          eventClick={handleEventClick}
           eventContent={(arg) => (
             <div
-            style={{
-              padding: "2px",
-              //render background colors onto priority levels
-              backgroundColor: arg.event.backgroundColor,
-              color: arg.event.backgroundColor === priorityColors.urgent ||
-                     arg.event.backgroundColor === priorityColors.important ||
-                     arg.event.backgroundColor === priorityColors.optional
-                     ? "white"
-                     : "black",
-            }}
-          >
-              {arg.timeText && (
-                <strong>
-                  {arg.timeText.slice(0, 5)} 
-                </strong>
-              )}
-              
-              <p>{arg.event.title}</p> 
+              style={{
+                padding: "2px",
+                //render background colors onto priority levels
+                backgroundColor: arg.event.backgroundColor,
+                color:
+                  arg.event.backgroundColor === priorityColors.urgent ||
+                  arg.event.backgroundColor === priorityColors.important ||
+                  arg.event.backgroundColor === priorityColors.optional
+                    ? "white"
+                    : "black",
+              }}
+            >
+              {arg.timeText && <strong>{arg.timeText.slice(0, 5)}</strong>}
+
+              <p>{arg.event.title}</p>
             </div>
           )}
         />
