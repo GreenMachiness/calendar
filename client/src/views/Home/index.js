@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -16,6 +16,9 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import { createTask } from "../../utility/api";
+import { fetchMe, fetchTasks } from "../../utility/api";
+import { isUserLoggedIn, clearToken } from "../../utility/utils";
 
 function Calendar() {
   // want to get the current date
@@ -39,7 +42,7 @@ function Calendar() {
     // console.log("start time:", startTime)
     return startTime.toTimeString().slice(0, 5);
   }
-
+  // give colors to priority levels. making them distinct
   const priorityColors = {
     optional: "blue",
     important: "green",
@@ -77,6 +80,25 @@ function Calendar() {
   const [priority, setPriority] = useState("");
   const [repetitionValue, setRepetitionValue] = useState("");
   const [repetitionUnit, setRepetitionUnit] = useState("days");
+  const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn()); // usestate for loggedIn or not
+  const [userId, setUserId] = useState(null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // check if user is logged in
+    if (isLoggedIn) {
+      // fetch user's id using user token
+      fetchMe().then((result) => {
+        // console.log("fetchMe: ", result);
+        // set user id state variable with the user id from the fetch request
+        setUserId(result.data.id);
+        // console.log("result.data:", result.data);
+        setUser(result.data);
+      });
+    }
+  }, []);
+
+
 
   const handleNotifyValueChange = (e) => {
     setNotifyValue(e.target.value);
@@ -106,7 +128,7 @@ function Calendar() {
     const clickedTask = {
       title: clickedEvent.title,
       start: clickedEvent.startStr,
-      end: clickedEvent.endStr || taskEndDate, // If end doesn't exist, use taskEndDate
+      end: clickedEvent.endStr || taskEndDate,
       isAllDay: clickedEvent.allDay,
       color: clickedEvent.backgroundColor,
     };
@@ -129,7 +151,7 @@ function Calendar() {
     setTaskStartDate(date);
     setTaskEndDate(date);
   };
-
+  // generate repetition of tasks when
   const generateRepeatedTasks = () => {
     const newTasks = [];
 
@@ -159,40 +181,68 @@ function Calendar() {
   };
 
   // need a function to add task for calendar
-  const addTask = () => {
-    const newTask = {
-      title: taskTitle,
-      start: `${taskStartDate}T${taskStartTime}`,
-      end: `${taskEndDate}T${taskEndTime}`,
-      allDay: isAllDay,
-      color: priorityColors[priority], //change color depending on priority
-      eventColor: priorityColors[priority],
-    };
-
-    // update the events with an existing task
-    const taskExists = tasks.some(
-      (task) => task.title === taskTitle && task.start === newTask.start
-    );
-
-    if (taskExists) {
-      // update the existing task
-      const updatedTasks = tasks.map((task) =>
-        task.title === taskTitle && task.start === newTask.start
-          ? newTask
-          : task
-      );
-      setTasks(updatedTasks);
-    } else {
-      //render current tasks
-      setTasks([...tasks, newTask, ...generateRepeatedTasks()]);
+  const addTask = async () => {
+    let priorityLevel = "";
+    if (priority === "optional") {
+      priorityLevel = "Optional";
+    } else if (priority === "important") {
+      priorityLevel = "Important";
+    } else if (priority === "urgent") {
+      priorityLevel = "Urgent";
     }
+    const taskData = {
+      taskTitle: taskTitle,
+      dateStart: `${taskStartDate}T${taskStartTime}`,
+      dateEnd: `${taskEndDate}T${taskEndTime}`,
+      timeStart: taskStartTime,
+      timeEnd: taskEndTime,
+      // allDay: isAllDay,
+      priorityLevel: priority, //change color depending on priority
+      
+      // eventColor: priorityColors[priority],
+      userId: userId, // Include the user ID here
+      
 
-    setShowForm(false);
-    setTaskTitle("");
-    setTaskStartDate(currentDate);
-    setTaskEndDate(currentDate);
-    setIsAllDay(false);
+
+    };
+    console.log("prioritylevel",priority)
+    console.log("taskdata:", taskData)
+  
+    try {
+      // Call createTask function from your API
+      const createdTask = await createTask(taskData);
+  
+      // Handle success (you can update state or perform other actions)
+      console.log("Task created:", createdTask);
+  
+      // update the events with an existing task
+      const taskExists = tasks.some(
+        (task) => task.title === taskTitle && task.start === taskData.start
+      );
+  
+      if (taskExists) {
+        // update the existing task
+        const updatedTasks = tasks.map((task) =>
+          task.title === taskTitle && task.start === taskData.start ? taskData : task
+        );
+        setTasks(updatedTasks);
+      } else {
+        //render current tasks
+        setTasks([...tasks, taskData, ...generateRepeatedTasks()]);
+      }
+  
+      // Close the form and reset form fields
+      setShowForm(false);
+      setTaskTitle("");
+      setTaskStartDate(currentDate);
+      setTaskEndDate(currentDate);
+      setIsAllDay(false);
+    } catch (error) {
+      // Handle errors (display an error message or perform other actions)
+      console.error("Error creating task:", error.message);
+    }
   };
+  
   // CSS for cursor on calendar
   const clickCursor = `
     .fc-daygrid-day, .fc-timegrid-slot {
@@ -237,7 +287,6 @@ function Calendar() {
               fullWidth
               value={taskStartDate}
               onChange={(e) => setTaskStartDate(e.target.value)}
-              disabled={isAllDay}
             />
             <TextField
               type="date"
@@ -246,7 +295,6 @@ function Calendar() {
               fullWidth
               value={taskEndDate}
               onChange={(e) => setTaskEndDate(e.target.value)}
-              disabled={isAllDay}
             />
           </div>
           <div style={{ display: "flex", gap: "10px" }}>
@@ -348,7 +396,7 @@ function Calendar() {
           placeholder="Placeholder"
           multiline
           variant="filled"
-          sx={{ width: "92%", my: 1, ml: 3 }} // Adjust width and add margin on y-axis
+          sx={{ width: "92%", my: 1, ml: 3 }}
         />
         <DialogActions>
           <Button
