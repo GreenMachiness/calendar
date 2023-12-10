@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -77,10 +77,10 @@ function Calendar() {
   );
   const [notifyValue, setNotifyValue] = useState("");
   const [notifyUnit, setNotifyUnit] = useState("minutes");
-  const [priority, setPriority] = useState("");
+  const [priority, setPriority] = useState("optional");
   const [repetitionValue, setRepetitionValue] = useState("");
   const [repetitionUnit, setRepetitionUnit] = useState("days");
-    const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn()); // usestate for loggedIn or not
+  const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn()); // usestate for loggedIn or not
   const [userId, setUserId] = useState(null);
   const [user, setUser] = useState(null);
 
@@ -96,11 +96,8 @@ function Calendar() {
         setUser(result.data);
         // console.log("result user:", result.data)
       });
-  
     }
   }, []);
-
-
 
   const handleNotifyValueChange = (e) => {
     setNotifyValue(e.target.value);
@@ -183,37 +180,35 @@ function Calendar() {
   };
 
   // need a function to add task for calendar
-  const addTask = async() => {
+  const addTask = async () => {
     const newTask = {
       title: taskTitle,
       start: `${taskStartDate}T${taskStartTime}`,
       end: `${taskEndDate}T${taskEndTime}`,
-      // allDay: isAllDay,
-      priorityLevel: priority, 
-      userId: userId
+      allDay: isAllDay,
+      priorityLevel: priority,
+      color: priorityColors[priority],
+      eventColor: priorityColors[priority],
+      userId: userId,
     };
 
-    console.log("newtask:", newTask)
+    console.log("newtask:", newTask);
     try {
-      
       const createdTask = await createTask(newTask);
 
-   
       console.log("Task created:", createdTask);
 
-     // set tasks with all the rendered tasks, the created tasks, plus tasks with repetition
-      setTasks([...tasks, createdTask, ...generateRepeatedTasks()]);
+      // set tasks with all the rendered tasks, the created tasks, plus tasks with repetition
+      setTasks([...tasks, newTask, createdTask, ...generateRepeatedTasks()]);
 
-      // 
+      //
       setShowForm(false);
       setTaskTitle("");
       setTaskStartDate(currentDate);
       setTaskEndDate(currentDate);
       setIsAllDay(false);
     } catch (error) {
-      // Handle errors
       console.error("Error creating task:", error.message);
-      // Handle specific error scenarios or logging for further debugging
     }
   };
 
@@ -409,7 +404,6 @@ function Calendar() {
             <div
               style={{
                 padding: "2px",
-                //render background colors onto priority levels
                 backgroundColor: arg.event.backgroundColor,
                 color:
                   arg.event.backgroundColor === priorityColors.urgent ||
@@ -420,7 +414,6 @@ function Calendar() {
               }}
             >
               {arg.timeText && <strong>{arg.timeText.slice(0, 5)}</strong>}
-
               <p>{arg.event.title}</p>
             </div>
           )}
