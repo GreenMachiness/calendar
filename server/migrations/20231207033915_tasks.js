@@ -5,14 +5,14 @@
 exports.up = function(knex) {
     return knex.schema.createTable('tasks', function(table) {
         table.increments('id');
-        table.string('taskTitle').notNullable();
-        table.date('dateStart').notNullable();
-        table.date('dateEnd').notNullable();
-        table.time('timeStart').unique();
-        table.time('timeEnd').unique();
-        table.enu('priorityLevel', ['Urgent', 'Important', 'Optional'])
+        table.string('title').notNullable();
+        table.date('start').notNullable();
+        table.date('end').notNullable();
+        table.time('timeStart')
+        table.time('timeEnd')
+        table.enu('priorityLevel', ['urgent', 'important', 'optional']).defaultTo('optional')
         table.text('notes') 
-        table.integer('userId').references('id').inTable('users').notNullable().onDelete('CASCADE')
+        table.integer('userId').references('id').inTable('users')
         table.timestamps(['true'], ['true'], ['true'])
       })
     }

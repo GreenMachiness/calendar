@@ -89,10 +89,10 @@ export default function Navbar() {
     if (isLoggedIn) {
       // fetch user's id using user token
       fetchMe().then((result) => {
-        console.log("fetchMe: ", result);
+        // console.log("fetchMe: ", result);
         // set user id state variable with the user id from the fetch request
         setUserId(result.data.id);
-        console.log("result.data:", result.data);
+        // console.log("result.data:", result.data);
         setUser(result.data);
       });
     }

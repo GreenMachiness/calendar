@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -16,6 +16,9 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import { createTask } from "../../utility/api";
+import { fetchMe, fetchTasks } from "../../utility/api";
+import { isUserLoggedIn, clearToken } from "../../utility/utils";
 
 function Calendar() {
   // want to get the current date
@@ -77,6 +80,27 @@ function Calendar() {
   const [priority, setPriority] = useState("");
   const [repetitionValue, setRepetitionValue] = useState("");
   const [repetitionUnit, setRepetitionUnit] = useState("days");
+    const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn()); // usestate for loggedIn or not
+  const [userId, setUserId] = useState(null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // check if user is logged in
+    if (isLoggedIn) {
+      // fetch user's id using user token
+      fetchMe().then((result) => {
+        // console.log("fetchMe: ", result);
+        // set user id state variable with the user id from the fetch request
+        setUserId(result.data.id);
+        // console.log("result.data:", result.data);
+        setUser(result.data);
+        // console.log("result user:", result.data)
+      });
+  
+    }
+  }, []);
+
+
 
   const handleNotifyValueChange = (e) => {
     setNotifyValue(e.target.value);
@@ -106,7 +130,7 @@ function Calendar() {
     const clickedTask = {
       title: clickedEvent.title,
       start: clickedEvent.startStr,
-      end: clickedEvent.endStr || taskEndDate, // If end doesn't exist, use taskEndDate
+      end: clickedEvent.endStr || taskEndDate,
       isAllDay: clickedEvent.allDay,
       color: clickedEvent.backgroundColor,
     };
@@ -159,40 +183,40 @@ function Calendar() {
   };
 
   // need a function to add task for calendar
-  const addTask = () => {
+  const addTask = async() => {
     const newTask = {
       title: taskTitle,
       start: `${taskStartDate}T${taskStartTime}`,
       end: `${taskEndDate}T${taskEndTime}`,
-      allDay: isAllDay,
-      color: priorityColors[priority], //change color depending on priority
-      eventColor: priorityColors[priority],
+      // allDay: isAllDay,
+      priorityLevel: priority, 
+      userId: userId
     };
 
-    // update the events with an existing task
-    const taskExists = tasks.some(
-      (task) => task.title === taskTitle && task.start === newTask.start
-    );
+    console.log("newtask:", newTask)
+    try {
+      
+      const createdTask = await createTask(newTask);
 
-    if (taskExists) {
-      // update the existing task
-      const updatedTasks = tasks.map((task) =>
-        task.title === taskTitle && task.start === newTask.start
-          ? newTask
-          : task
-      );
-      setTasks(updatedTasks);
-    } else {
-      //render current tasks
-      setTasks([...tasks, newTask, ...generateRepeatedTasks()]);
+   
+      console.log("Task created:", createdTask);
+
+     // set tasks with all the rendered tasks, the created tasks, plus tasks with repetition
+      setTasks([...tasks, createdTask, ...generateRepeatedTasks()]);
+
+      // 
+      setShowForm(false);
+      setTaskTitle("");
+      setTaskStartDate(currentDate);
+      setTaskEndDate(currentDate);
+      setIsAllDay(false);
+    } catch (error) {
+      // Handle errors
+      console.error("Error creating task:", error.message);
+      // Handle specific error scenarios or logging for further debugging
     }
-
-    setShowForm(false);
-    setTaskTitle("");
-    setTaskStartDate(currentDate);
-    setTaskEndDate(currentDate);
-    setIsAllDay(false);
   };
+
   // CSS for cursor on calendar
   const clickCursor = `
     .fc-daygrid-day, .fc-timegrid-slot {

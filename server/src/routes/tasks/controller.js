@@ -30,8 +30,8 @@ exports.getTaskById = async (req, res) => {
 // create a task
 exports.createTask = async (req, res) => {
   try {
-    const taskData = req.body;
-    const createdTask = await createTask(taskData);
+    const newTask = req.body;
+    const createdTask = await createTask(newTask);
 
     return res.status(201).json({ message: 'Task created successfully!', data: createdTask });
   } catch (error) {

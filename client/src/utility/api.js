@@ -120,3 +120,95 @@ export const fetchMe = async () => {
 
   return responseData;
 };
+
+export const createTask = async (newTask) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error(`Missing User Token`);
+  }
+
+  const response = await fetch(`${baseUrl}/tasks`, {
+    method: "POST",
+    headers: new Headers({
+      "Authorization": `Bearer ${token}`, 
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify(newTask),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(`Status Code: ${response?.status} - ${responseData?.message}`);
+  }
+
+  return responseData;
+};
+
+export const updateTask = async (taskId, updatedTaskData) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error(`Missing User Token`);
+  }
+
+  const response = await fetch(`${baseUrl}/tasks/${taskId}`, {
+    method: "PUT",
+    headers: new Headers({
+      "Authorization": `Bearer ${token}`, 
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify(updatedTaskData),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(`Status Code: ${response?.status} - ${responseData?.message}`);
+  }
+
+  return responseData;
+};
+
+export const deleteTask = async (taskId) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error(`Missing User Token`);
+  }
+
+  const response = await fetch(`${baseUrl}/tasks/${taskId}`, {
+    method: "DELETE",
+    headers: new Headers({
+      "Authorization": `Bearer ${token}`, 
+    }),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(`Status Code: ${response?.status} - ${responseData?.message}`);
+  }
+
+  return responseData;
+};
+
+export const fetchTasks = async () => {
+  const token = getToken();
+  if (!token) {
+    throw new Error(`Missing User Token`);
+  }
+
+  const response = await fetch(`${baseUrl}/tasks`, {
+    method: "GET",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`, // Token is required for protected Routes
+    }),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(`Status Code: ${response?.status} - ${responseData?.message}`);
+  }
+
+  return responseData;
+};
