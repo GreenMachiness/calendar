@@ -1,17 +1,13 @@
-const { Router } = require('express')
+const { Router } = require('express');
 
-// import routes
-const root = require('./root/router')
-const users = require('./users/router')
+const tasks = require('./tasks/router');
+const root = require('./root/router');
+const users = require('./users/router');
 
+const allRouters = new Router();
 
-// create a new Router instance
-const allRouters = new Router()
+allRouters.use('/', root);
+allRouters.use('/users', users);
+allRouters.use('/tasks', tasks);
 
-// create base routes
-allRouters.use('/', root)
-allRouters.use('/users', users)
-
-
-// exporting router
-module.exports = allRouters
+module.exports = allRouters;

@@ -18,9 +18,9 @@ exports.findTaskById = async (taskId) => {
   }
 };
 
-exports.createTask = async (taskData) => {
+exports.createTask = async (newTask) => {
   try {
-    const createdTask = await knex('tasks').insert(taskData).returning('*');
+    const createdTask = await knex('tasks').insert(newTask).returning('*');
     return createdTask[0];
   } catch (error) {
     throw error;
