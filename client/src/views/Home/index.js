@@ -50,14 +50,7 @@ function Calendar() {
   };
 
   // need tasks to render into my calendar to see if it works
-  const [tasks, setTasks] = useState([
-    { title: "Clean Car", date: "2023-12-25" },
-    {
-      title: "Change Brush",
-      date: "2023-12-28",
-      color: priorityColors.urgent, // use the color from your priorityColors object
-    },
-  ]);
+  const [tasks, setTasks] = useState([]);
 
   // hooks for showing form for creating tasks, initial render is false
   const [showForm, setShowForm] = useState(false);
@@ -68,7 +61,7 @@ function Calendar() {
   // hooks for that task date
   const [taskStartDate, setTaskStartDate] = useState(null);
   const [taskEndDate, setTaskEndDate] = useState(null);
-  const [isAllDay, setIsAllDay] = useState(false);
+  const [allDay, setAllDay] = useState(false);
   const [taskStartTime, setTaskStartTime] = useState(
     currentHour.toTimeString().slice(0, 5) //set initial render to the next hour rounded up
   );
@@ -116,7 +109,7 @@ function Calendar() {
             end: task.end,
             timeStart: task.timeStart,
             timeEnd: task.timeEnd,
-            allDay: task.isAllDay,
+            allDay: task.allDay,
             priorityLevel: task.priority,
             color: task.color,
             eventColor: task.eventColor,
@@ -135,7 +128,35 @@ function Calendar() {
     //when testing, make this an empty array, it infinitely loops
     // console.log("tasks:", tasks)
     getAllTasks();
-  }, [tasks]);
+    // console.log("Tasks after update:", tasks);
+
+  }, []);
+
+  const updateTasks = async () => {
+    try {
+      const fetchedTasks = await fetchTasks();
+
+      if (fetchedTasks && Array.isArray(fetchedTasks.data)) {
+        const formattedTasks = fetchedTasks.data.map((task) => ({
+          id: task.id,
+          title: task.title,
+          start: task.start,
+          end: task.end,
+          timeStart: task.timeStart,
+          timeEnd: task.timeEnd,
+          allDay: task.allDay,
+          priorityLevel: task.priority,
+          color: task.color,
+          eventColor: task.eventColor,
+          userId: task.userId,
+        }));
+        setTasks(formattedTasks);
+        // console.log("check there:",formattedTasks)
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error.message);
+    }
+  };
 
   const handleNotifyValueChange = (e) => {
     setNotifyValue(e.target.value);
@@ -169,7 +190,7 @@ function Calendar() {
     setTaskTitle(title);
     setTaskStartDate(formattedStartDate);
     setTaskEndDate(formattedEndDate);
-    setIsAllDay(allDay);
+    setAllDay(allDay);
     //cant get priority level, clickInfo.event from full calendar doesnt have priority level, they do have colors. Assign colors with a priority level, giving us a priority level we can set
     const priorityMap = {
       green: "important",
@@ -196,7 +217,8 @@ function Calendar() {
 
       setShowForm(false);
 
-      console.log("Task is deleted");
+      console.log("task is deleted");
+      updateTasks();
     } catch (error) {
       console.error("Error deleting task:", error.message);
     }
@@ -228,7 +250,7 @@ function Calendar() {
           title: taskTitle,
           start: date.toISOString().split("T")[0],
           end: date.toISOString().split("T")[0],
-          allDay: isAllDay,
+          allDay: allDay,
           color: priorityColors[priority],
           eventColor: priorityColors[priority],
         };
@@ -241,37 +263,43 @@ function Calendar() {
 
   // need a function to add task for calendar
   const addTask = async () => {
+    
     const newTask = {
       title: taskTitle,
-      start: taskStartDate,
+      start: `${taskStartDate}T${taskStartTime}`,
       end: taskEndDate,
       timeStart: `${taskStartTime}`,
       timeEnd: `${taskEndTime}`,
-      allDay: isAllDay,
+      allDay: allDay,
       priorityLevel: priority,
       color: priorityColors[priority],
       eventColor: priorityColors[priority],
       userId: userId,
     };
+    console.log("check here:", `${taskStartDate}T${taskStartTime}`)
 
     try {
       if (selectedTask) {
         // need a way to update a task through ID, using the form of creating a task, we can update it by getting the data of the selected task
         const updatedTask = await updateTask(selectedTask, newTask);
-        console.log("Task updated:", updatedTask);
+        // console.log("task updated:", updatedTask);
 
         // set tasks to updated tasks, would render the changes of the task.
         const updatedTasks = tasks.map((task) =>
+        
           task.id === selectedTask ? updatedTask : task
         );
+        // console.log("is ths updating?:", updatedTask)
         setTasks(updatedTasks);
+        // console.log("is ths updating?:", updatedTask)
+
       } else {
         // if else, create that task,
         const createdTask = await createTask(newTask);
         console.log("Task created:", createdTask);
 
         // setTasks with the new tasks that has been created.
-        setTasks([...tasks, newTask, createdTask, ...generateRepeatedTasks()]);
+        setTasks([...tasks, createdTask, ...generateRepeatedTasks()]);
       }
 
       // close the form
@@ -279,8 +307,10 @@ function Calendar() {
       setTaskTitle("");
       setTaskStartDate(currentDate);
       setTaskEndDate(currentDate);
-      setIsAllDay(false);
+      setAllDay(false);
       setSelectedTask(null);
+      updateTasks();
+
     } catch (error) {
       console.error("Error:", error.message);
     }
@@ -324,7 +354,7 @@ function Calendar() {
           />
           <div style={{ display: "flex", gap: "10px" }}>
             <TextField
-              type="date"
+              type="date"y
               margin="dense"
               label="Start Date"
               fullWidth
@@ -348,7 +378,7 @@ function Calendar() {
               fullWidth
               value={taskStartTime}
               onChange={(e) => setTaskStartTime(e.target.value)}
-              disabled={isAllDay}
+              disabled={allDay}
             />
             <TextField
               type="time"
@@ -357,14 +387,14 @@ function Calendar() {
               fullWidth
               value={taskEndTime}
               onChange={(e) => setTaskEndTime(e.target.value)}
-              disabled={isAllDay}
+              disabled={allDay}
             />
           </div>
           <FormControlLabel
             control={
               <Checkbox
-                checked={isAllDay}
-                onChange={(e) => setIsAllDay(e.target.checked)}
+                checked={allDay}
+                onChange={(e) => setAllDay(e.target.checked)}
               />
             }
             label="All-day"
