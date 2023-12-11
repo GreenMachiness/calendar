@@ -17,7 +17,7 @@ import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import { createTask } from "../../utility/api";
-import { fetchMe, fetchTasks, updateTask } from "../../utility/api";
+import { fetchMe, fetchTasks, updateTask, deleteTask } from "../../utility/api";
 import { isUserLoggedIn, clearToken } from "../../utility/utils";
 
 function Calendar() {
@@ -133,6 +133,7 @@ function Calendar() {
       }
     };
     //when testing, make this an empty array, it infinitely loops
+    // console.log("tasks:", tasks)
     getAllTasks();
   }, [tasks]);
 
@@ -155,13 +156,13 @@ function Calendar() {
   const handleRepetitionUnitChange = (e) => {
     setRepetitionUnit(e.target.value);
   };
-
+  //full calendar has handle event click on their docs to get data of the task when clicked. 
   const handleEventClick = async (clickInfo) => {
     //something wrong with the start and end, wrong format.
     const clickedEvent = clickInfo.event;
 
     const { id, title, start, end, allDay, borderColor } = clickedEvent;
-    //fomrat the date so that it can be added onto database. it will only take YYYY/MM/DD
+    //format the date so that it can be added onto database. it will only take YYYY/MM/DD
     const formattedStartDate = new Date(start).toISOString().split("T")[0];
     const formattedEndDate = new Date(end).toISOString().split("T")[0];
 
@@ -184,6 +185,21 @@ function Calendar() {
     setSelectedTask(id);
     setShowForm(true);
     console.log("id:", id);
+  };
+//handle delete button.
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await deleteTask(taskId);
+      //get the ID of the task when clicked on
+      setTasks(tasks.filter((task) => task.id !== taskId));
+      console.log("data passing: ", tasks);
+
+      setShowForm(false);
+
+      console.log("Task is deleted");
+    } catch (error) {
+      console.error("Error deleting task:", error.message);
+    }
   };
 
   // need a function when clicking on a calendar date, it would bring up the form for that current date
@@ -419,13 +435,23 @@ function Calendar() {
         </FormControl>
         <TextField
           id="filled-textarea"
-          label="Multiline Placeholder"
+          label="Notes"
           placeholder="Placeholder"
           multiline
           variant="filled"
-          sx={{ width: "92%", my: 1, ml: 3 }} // Adjust width and add margin on y-axis
+          sx={{ width: "92%", my: 1, ml: 3 }} 
         />
         <DialogActions>
+          {/* make a button for deleting a task. make it only appear when a task has existed in the database. */}
+          {selectedTask && (
+            <Button
+              variant="contained"
+              onClick={() => handleDeleteTask(selectedTask)}
+              style={{ backgroundColor: "red", color: "white" }}
+            >
+              Delete Task
+            </Button>
+          )}
           <Button
             variant="contained"
             onClick={() => setShowForm(false)}
