@@ -135,7 +135,9 @@ function Calendar() {
     //when testing, make this an empty array, it infinitely loops
     // console.log("tasks:", tasks)
     getAllTasks();
-  }, [tasks]);
+    // console.log("Tasks after update:", tasks);
+
+  }, []);
 
   const handleNotifyValueChange = (e) => {
     setNotifyValue(e.target.value);
@@ -258,20 +260,24 @@ function Calendar() {
       if (selectedTask) {
         // need a way to update a task through ID, using the form of creating a task, we can update it by getting the data of the selected task
         const updatedTask = await updateTask(selectedTask, newTask);
-        console.log("Task updated:", updatedTask);
+        // console.log("task updated:", updatedTask);
 
         // set tasks to updated tasks, would render the changes of the task.
         const updatedTasks = tasks.map((task) =>
+        
           task.id === selectedTask ? updatedTask : task
         );
+        // console.log("is ths updating?:", updatedTask)
         setTasks(updatedTasks);
+        console.log("is ths updating?:", updatedTask)
+
       } else {
         // if else, create that task,
         const createdTask = await createTask(newTask);
         console.log("Task created:", createdTask);
 
         // setTasks with the new tasks that has been created.
-        setTasks([...tasks, newTask, createdTask, ...generateRepeatedTasks()]);
+        setTasks([...tasks, createdTask,newTask, ...generateRepeatedTasks()]);
       }
 
       // close the form
