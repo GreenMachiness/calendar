@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { authenticate } = require('../../middleware/auth');
-const {showAllTasks, createTask, getTaskById, updateTaskById, deleteTaskById,} = require('./controller');
+const {showAllTasks, createTask, getTaskById, updateTaskById, deleteTaskById} = require('./controller');
 
 const router = new Router();
 

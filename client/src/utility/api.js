@@ -200,7 +200,7 @@ export const fetchTasks = async () => {
   const response = await fetch(`${baseUrl}/tasks`, {
     method: "GET",
     headers: new Headers({
-      Authorization: `Bearer ${token}`, // Token is required for protected Routes
+      Authorization: `Bearer ${token}`, 
     }),
   });
 

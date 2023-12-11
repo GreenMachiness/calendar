@@ -66,8 +66,8 @@ function Calendar() {
   const [taskTitle, setTaskTitle] = useState("");
 
   // hooks for that task date
-  const [taskStartDate, setTaskStartDate] = useState(currentDate);
-  const [taskEndDate, setTaskEndDate] = useState(currentDate);
+  const [taskStartDate, setTaskStartDate] = useState(null);
+  const [taskEndDate, setTaskEndDate] = useState(null);
   const [isAllDay, setIsAllDay] = useState(false);
   const [taskStartTime, setTaskStartTime] = useState(
     currentHour.toTimeString().slice(0, 5) //set initial render to the next hour rounded up
@@ -97,6 +97,41 @@ function Calendar() {
         // console.log("result user:", result.data)
       });
     }
+  }, []);
+  //need to fetch tasks from database and render them on calendar
+  useEffect(() => {
+    const getAllTasks = async () => {
+      try {
+        //use the fetchTasks from api.js to get tasks
+        const fetchedTasks = await fetchTasks();
+
+        //getting error that its not iterable, need to format the object to get tasks correctly
+        if (fetchedTasks && Array.isArray(fetchedTasks.data)) {
+          //format tasks to correctly fetch the tasks from database.
+          const formattedTasks = fetchedTasks.data.map((task) => ({
+            title: task.title,
+            start: task.start,
+            end: task.end,
+            timeStart: task.timeStart,
+            timeEnd: task.timeEnd,
+            allDay: task.isAllDay,
+            priorityLevel: task.priority,
+            color: task.color,
+            eventColor: task.eventColor,
+            userId: task.userId,
+          }));
+          console.log("tasks:", formattedTasks);
+
+          //set state to get all the tasks and formmated tasks
+          setTasks([...tasks, ...formattedTasks]);
+          console.log("hello:", taskStartDate);
+        }
+      } catch (error) {
+        console.error("Error fetching tasks:", error.message);
+      }
+    };
+
+    getAllTasks();
   }, []);
 
   const handleNotifyValueChange = (e) => {
@@ -134,7 +169,7 @@ function Calendar() {
 
     // render the form fields with the details of the clicked task
     setTaskTitle(clickedTask.title);
-    setTaskStartDate(clickedTask.start.slice(0, 10));
+    setTaskStartDate(taskStartDate);
     setTaskEndDate(clickedTask.end.slice(0, 10));
     setIsAllDay(clickedTask.isAllDay);
 
@@ -183,14 +218,17 @@ function Calendar() {
   const addTask = async () => {
     const newTask = {
       title: taskTitle,
-      start: `${taskStartDate}T${taskStartTime}`,
-      end: `${taskEndDate}T${taskEndTime}`,
+      start: taskStartDate,
+      end: taskEndDate,
+      timeStart: `${taskStartTime}`,
+      timeEnd: `${taskEndTime}`,
       allDay: isAllDay,
       priorityLevel: priority,
       color: priorityColors[priority],
       eventColor: priorityColors[priority],
       userId: userId,
     };
+    // console.log("bye:", taskStartDate)
 
     console.log("newtask:", newTask);
     try {
@@ -204,8 +242,8 @@ function Calendar() {
       //
       setShowForm(false);
       setTaskTitle("");
-      setTaskStartDate(currentDate);
-      setTaskEndDate(currentDate);
+      setTaskStartDate(taskStartDate);
+      setTaskEndDate(taskEndDate);
       setIsAllDay(false);
     } catch (error) {
       console.error("Error creating task:", error.message);
@@ -225,8 +263,8 @@ function Calendar() {
         variant="contained"
         onClick={() => {
           setShowForm(true);
-          setTaskStartDate(currentDate);
-          setTaskEndDate(currentDate);
+          setTaskStartDate(taskStartDate);
+          setTaskEndDate(taskEndDate);
         }}
       >
         Add Task
@@ -256,7 +294,6 @@ function Calendar() {
               fullWidth
               value={taskStartDate}
               onChange={(e) => setTaskStartDate(e.target.value)}
-              disabled={isAllDay}
             />
             <TextField
               type="date"
@@ -265,7 +302,6 @@ function Calendar() {
               fullWidth
               value={taskEndDate}
               onChange={(e) => setTaskEndDate(e.target.value)}
-              disabled={isAllDay}
             />
           </div>
           <div style={{ display: "flex", gap: "10px" }}>
