@@ -17,7 +17,7 @@ import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import { createTask } from "../../utility/api";
-import { fetchMe, fetchTasks } from "../../utility/api";
+import { fetchMe, fetchTasks, updateTask } from "../../utility/api";
 import { isUserLoggedIn, clearToken } from "../../utility/utils";
 
 function Calendar() {
@@ -83,6 +83,7 @@ function Calendar() {
   const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn()); // usestate for loggedIn or not
   const [userId, setUserId] = useState(null);
   const [user, setUser] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
     // check if user is logged in
@@ -109,6 +110,7 @@ function Calendar() {
         if (fetchedTasks && Array.isArray(fetchedTasks.data)) {
           //format tasks to correctly fetch the tasks from database.
           const formattedTasks = fetchedTasks.data.map((task) => ({
+            id: task.id,
             title: task.title,
             start: task.start,
             end: task.end,
@@ -120,19 +122,19 @@ function Calendar() {
             eventColor: task.eventColor,
             userId: task.userId,
           }));
-          console.log("tasks:", formattedTasks);
+          // console.log("tasks:", formattedTasks);
 
           //set state to get all the tasks and formmated tasks
           setTasks([...tasks, ...formattedTasks]);
-          console.log("hello:", taskStartDate);
+          // console.log("hello:", taskStartDate);
         }
       } catch (error) {
         console.error("Error fetching tasks:", error.message);
       }
     };
-
+    //when testing, make this an empty array, it infinitely loops
     getAllTasks();
-  }, []);
+  }, [tasks]);
 
   const handleNotifyValueChange = (e) => {
     setNotifyValue(e.target.value);
@@ -154,27 +156,34 @@ function Calendar() {
     setRepetitionUnit(e.target.value);
   };
 
-  // need a function to handle clicking on an event/task in the calendar
-  const handleEventClick = (clickInfo) => {
+  const handleEventClick = async (clickInfo) => {
+    //something wrong with the start and end, wrong format.
     const clickedEvent = clickInfo.event;
 
-    // get the details of the clicked event
-    const clickedTask = {
-      title: clickedEvent.title,
-      start: clickedEvent.startStr,
-      end: clickedEvent.endStr || taskEndDate,
-      isAllDay: clickedEvent.allDay,
-      color: clickedEvent.backgroundColor,
+    const { id, title, start, end, allDay, borderColor } = clickedEvent;
+    //fomrat the date so that it can be added onto database. it will only take YYYY/MM/DD
+    const formattedStartDate = new Date(start).toISOString().split("T")[0];
+    const formattedEndDate = new Date(end).toISOString().split("T")[0];
+
+    setTaskTitle(title);
+    setTaskStartDate(formattedStartDate);
+    setTaskEndDate(formattedEndDate);
+    setIsAllDay(allDay);
+    //cant get priority level, clickInfo.event from full calendar doesnt have priority level, they do have colors. Assign colors with a priority level, giving us a priority level we can set
+    const priorityMap = {
+      green: "important",
+      red: "urgent",
+      blue: "optional",
     };
 
-    // render the form fields with the details of the clicked task
-    setTaskTitle(clickedTask.title);
-    setTaskStartDate(taskStartDate);
-    setTaskEndDate(clickedTask.end.slice(0, 10));
-    setIsAllDay(clickedTask.isAllDay);
+    // console.log("get ID:", clickedEvent)
 
-    // open the form with the task details
+    const selectedPriority = priorityMap[borderColor];
+
+    setPriority(selectedPriority);
+    setSelectedTask(id);
     setShowForm(true);
+    console.log("id:", id);
   };
 
   // need a function when clicking on a calendar date, it would bring up the form for that current date
@@ -228,25 +237,36 @@ function Calendar() {
       eventColor: priorityColors[priority],
       userId: userId,
     };
-    // console.log("bye:", taskStartDate)
 
-    console.log("newtask:", newTask);
     try {
-      const createdTask = await createTask(newTask);
+      if (selectedTask) {
+        // need a way to update a task through ID, using the form of creating a task, we can update it by getting the data of the selected task
+        const updatedTask = await updateTask(selectedTask, newTask);
+        console.log("Task updated:", updatedTask);
 
-      console.log("Task created:", createdTask);
+        // set tasks to updated tasks, would render the changes of the task.
+        const updatedTasks = tasks.map((task) =>
+          task.id === selectedTask ? updatedTask : task
+        );
+        setTasks(updatedTasks);
+      } else {
+        // if else, create that task,
+        const createdTask = await createTask(newTask);
+        console.log("Task created:", createdTask);
 
-      // set tasks with all the rendered tasks, the created tasks, plus tasks with repetition
-      setTasks([...tasks, newTask, createdTask, ...generateRepeatedTasks()]);
+        // setTasks with the new tasks that has been created.
+        setTasks([...tasks, newTask, createdTask, ...generateRepeatedTasks()]);
+      }
 
-      //
+      // close the form
       setShowForm(false);
       setTaskTitle("");
-      setTaskStartDate(taskStartDate);
-      setTaskEndDate(taskEndDate);
+      setTaskStartDate(currentDate);
+      setTaskEndDate(currentDate);
       setIsAllDay(false);
+      setSelectedTask(null);
     } catch (error) {
-      console.error("Error creating task:", error.message);
+      console.error("Error:", error.message);
     }
   };
 
