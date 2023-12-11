@@ -61,7 +61,7 @@ function Calendar() {
   // hooks for that task date
   const [taskStartDate, setTaskStartDate] = useState(null);
   const [taskEndDate, setTaskEndDate] = useState(null);
-  const [isAllDay, setIsAllDay] = useState(false);
+  const [allDay, setAllDay] = useState(false);
   const [taskStartTime, setTaskStartTime] = useState(
     currentHour.toTimeString().slice(0, 5) //set initial render to the next hour rounded up
   );
@@ -109,7 +109,7 @@ function Calendar() {
             end: task.end,
             timeStart: task.timeStart,
             timeEnd: task.timeEnd,
-            allDay: task.isAllDay,
+            allDay: task.allDay,
             priorityLevel: task.priority,
             color: task.color,
             eventColor: task.eventColor,
@@ -144,13 +144,14 @@ function Calendar() {
           end: task.end,
           timeStart: task.timeStart,
           timeEnd: task.timeEnd,
-          allDay: task.isAllDay,
+          allDay: task.allDay,
           priorityLevel: task.priority,
           color: task.color,
           eventColor: task.eventColor,
           userId: task.userId,
         }));
         setTasks(formattedTasks);
+        // console.log("check there:",formattedTasks)
       }
     } catch (error) {
       console.error("Error fetching tasks:", error.message);
@@ -189,7 +190,7 @@ function Calendar() {
     setTaskTitle(title);
     setTaskStartDate(formattedStartDate);
     setTaskEndDate(formattedEndDate);
-    setIsAllDay(allDay);
+    setAllDay(allDay);
     //cant get priority level, clickInfo.event from full calendar doesnt have priority level, they do have colors. Assign colors with a priority level, giving us a priority level we can set
     const priorityMap = {
       green: "important",
@@ -249,7 +250,7 @@ function Calendar() {
           title: taskTitle,
           start: date.toISOString().split("T")[0],
           end: date.toISOString().split("T")[0],
-          allDay: isAllDay,
+          allDay: allDay,
           color: priorityColors[priority],
           eventColor: priorityColors[priority],
         };
@@ -262,18 +263,20 @@ function Calendar() {
 
   // need a function to add task for calendar
   const addTask = async () => {
+    
     const newTask = {
       title: taskTitle,
-      start: taskStartDate,
+      start: `${taskStartDate}T${taskStartTime}`,
       end: taskEndDate,
       timeStart: `${taskStartTime}`,
       timeEnd: `${taskEndTime}`,
-      allDay: isAllDay,
+      allDay: allDay,
       priorityLevel: priority,
       color: priorityColors[priority],
       eventColor: priorityColors[priority],
       userId: userId,
     };
+    console.log("check here:", `${taskStartDate}T${taskStartTime}`)
 
     try {
       if (selectedTask) {
@@ -304,7 +307,7 @@ function Calendar() {
       setTaskTitle("");
       setTaskStartDate(currentDate);
       setTaskEndDate(currentDate);
-      setIsAllDay(false);
+      setAllDay(false);
       setSelectedTask(null);
       updateTasks();
 
@@ -351,7 +354,7 @@ function Calendar() {
           />
           <div style={{ display: "flex", gap: "10px" }}>
             <TextField
-              type="date"
+              type="date"y
               margin="dense"
               label="Start Date"
               fullWidth
@@ -375,7 +378,7 @@ function Calendar() {
               fullWidth
               value={taskStartTime}
               onChange={(e) => setTaskStartTime(e.target.value)}
-              disabled={isAllDay}
+              disabled={allDay}
             />
             <TextField
               type="time"
@@ -384,14 +387,14 @@ function Calendar() {
               fullWidth
               value={taskEndTime}
               onChange={(e) => setTaskEndTime(e.target.value)}
-              disabled={isAllDay}
+              disabled={allDay}
             />
           </div>
           <FormControlLabel
             control={
               <Checkbox
-                checked={isAllDay}
-                onChange={(e) => setIsAllDay(e.target.checked)}
+                checked={allDay}
+                onChange={(e) => setAllDay(e.target.checked)}
               />
             }
             label="All-day"
