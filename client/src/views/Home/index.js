@@ -50,14 +50,7 @@ function Calendar() {
   };
 
   // need tasks to render into my calendar to see if it works
-  const [tasks, setTasks] = useState([
-    { title: "Clean Car", date: "2023-12-25" },
-    {
-      title: "Change Brush",
-      date: "2023-12-28",
-      color: priorityColors.urgent, // use the color from your priorityColors object
-    },
-  ]);
+  const [tasks, setTasks] = useState([]);
 
   // hooks for showing form for creating tasks, initial render is false
   const [showForm, setShowForm] = useState(false);
@@ -139,6 +132,31 @@ function Calendar() {
 
   }, []);
 
+  const updateTasks = async () => {
+    try {
+      const fetchedTasks = await fetchTasks();
+
+      if (fetchedTasks && Array.isArray(fetchedTasks.data)) {
+        const formattedTasks = fetchedTasks.data.map((task) => ({
+          id: task.id,
+          title: task.title,
+          start: task.start,
+          end: task.end,
+          timeStart: task.timeStart,
+          timeEnd: task.timeEnd,
+          allDay: task.isAllDay,
+          priorityLevel: task.priority,
+          color: task.color,
+          eventColor: task.eventColor,
+          userId: task.userId,
+        }));
+        setTasks(formattedTasks);
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error.message);
+    }
+  };
+
   const handleNotifyValueChange = (e) => {
     setNotifyValue(e.target.value);
   };
@@ -198,7 +216,8 @@ function Calendar() {
 
       setShowForm(false);
 
-      console.log("Task is deleted");
+      console.log("task is deleted");
+      updateTasks();
     } catch (error) {
       console.error("Error deleting task:", error.message);
     }
@@ -269,7 +288,7 @@ function Calendar() {
         );
         // console.log("is ths updating?:", updatedTask)
         setTasks(updatedTasks);
-        console.log("is ths updating?:", updatedTask)
+        // console.log("is ths updating?:", updatedTask)
 
       } else {
         // if else, create that task,
@@ -277,7 +296,7 @@ function Calendar() {
         console.log("Task created:", createdTask);
 
         // setTasks with the new tasks that has been created.
-        setTasks([...tasks, createdTask,newTask, ...generateRepeatedTasks()]);
+        setTasks([...tasks, createdTask, ...generateRepeatedTasks()]);
       }
 
       // close the form
@@ -287,6 +306,8 @@ function Calendar() {
       setTaskEndDate(currentDate);
       setIsAllDay(false);
       setSelectedTask(null);
+      updateTasks();
+
     } catch (error) {
       console.error("Error:", error.message);
     }
