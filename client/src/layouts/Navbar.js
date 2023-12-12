@@ -14,7 +14,7 @@ import { useState, useEffect } from "react";
 import { isUserLoggedIn, clearToken } from "../utility/utils";
 import HomeIcon from "@mui/icons-material/Home";
 import { fetchMe } from "../utility/api";
-import TimerIcon from '@mui/icons-material/Timer';
+import TimerIcon from "@mui/icons-material/Timer";
 
 const StyledButtonLink = styled(Link)(({ theme }) => ({
   //make navbar buttons look more like buttons rather than just text
@@ -193,13 +193,15 @@ export default function Navbar() {
       <AppBar position="static">
         <Toolbar>
           <StyledButtonLink to={"/"}>
-            <Typography variant="h6" noWrap>
-              <HomeIcon sx={{ fontSize: 25 }} />
+          <Typography variant="h6" noWrap sx={{ display: 'flex', alignItems: 'center' }}>
+  <HomeIcon sx={{ fontSize: 25, marginRight: 1 }} />
+  <span style={{ marginLeft: '2px', marginTop: '2px' }}>Home</span>
             </Typography>
           </StyledButtonLink>
           <StyledButtonLink to={"/stopwatch"}>
-            <Typography variant="h6" noWrap>
-              <TimerIcon sx={{ fontSize: 25 }} />
+          <Typography variant="h6" noWrap sx={{ display: 'flex', alignItems: 'center' }}>
+  <TimerIcon sx={{ fontSize: 25, marginRight: 1 }} />
+  <span style={{ marginLeft: '2px', marginTop: '2px' }}>Stopwatch</span>
             </Typography>
           </StyledButtonLink>
           {/* <Search>
