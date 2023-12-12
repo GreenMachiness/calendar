@@ -61,7 +61,7 @@ function Calendar() {
   // hooks for that task date
   const [taskStartDate, setTaskStartDate] = useState(null);
   const [taskEndDate, setTaskEndDate] = useState(null);
-  const [allDay, setAllDay] = useState(false);
+  const [allDay, setAllDay] = useState(true);
   const [taskStartTime, setTaskStartTime] = useState(
     currentHour.toTimeString().slice(0, 5) //set initial render to the next hour rounded up
   );
@@ -122,18 +122,18 @@ function Calendar() {
           // console.log("hello:", taskStartDate);
         }
       } catch (error) {
-        console.error("Error fetching tasks:", error.message);
+        console.error("error fetching tasks:", error.message);
       }
     };
     //when testing, make this an empty array, it infinitely loops
     // console.log("tasks:", tasks)
     getAllTasks();
-    // console.log("Tasks after update:", tasks);
-
+    // console.log("tasks after update:", tasks);
   }, []);
-
+  //need to re-render the my tasks to reflect my database. 
   const updateTasks = async () => {
     try {
+      //maybe fetch tasks again from the database. whichever is not there or is updated would re-render the app
       const fetchedTasks = await fetchTasks();
 
       if (fetchedTasks && Array.isArray(fetchedTasks.data)) {
@@ -150,11 +150,12 @@ function Calendar() {
           eventColor: task.eventColor,
           userId: task.userId,
         }));
+        //render my tasks with all updates and deletions
         setTasks(formattedTasks);
         // console.log("check there:",formattedTasks)
       }
     } catch (error) {
-      console.error("Error fetching tasks:", error.message);
+      console.error("error fetching tasks:", error.message);
     }
   };
 
@@ -177,7 +178,7 @@ function Calendar() {
   const handleRepetitionUnitChange = (e) => {
     setRepetitionUnit(e.target.value);
   };
-  //full calendar has handle event click on their docs to get data of the task when clicked. 
+  //full calendar has handle event click on their docs to get data of the task when clicked.
   const handleEventClick = async (clickInfo) => {
     //something wrong with the start and end, wrong format.
     const clickedEvent = clickInfo.event;
@@ -207,7 +208,7 @@ function Calendar() {
     setShowForm(true);
     console.log("id:", id);
   };
-//handle delete button.
+  //handle delete button.
   const handleDeleteTask = async (taskId) => {
     try {
       await deleteTask(taskId);
@@ -220,7 +221,7 @@ function Calendar() {
       console.log("task is deleted");
       updateTasks();
     } catch (error) {
-      console.error("Error deleting task:", error.message);
+      console.error("error deleting task:", error.message);
     }
   };
 
@@ -233,40 +234,11 @@ function Calendar() {
     setTaskEndDate(date);
   };
 
-  const generateRepeatedTasks = () => {
-    const newTasks = [];
-
-    if (repetitionValue && parseInt(repetitionValue) > 0) {
-      const interval = parseInt(repetitionValue);
-      const startDate = new Date(taskStartDate);
-      const endDate = new Date(taskEndDate);
-
-      for (
-        let date = new Date(startDate);
-        date <= endDate;
-        date.setDate(date.getDate() + interval)
-      ) {
-        const newTask = {
-          title: taskTitle,
-          start: date.toISOString().split("T")[0],
-          end: date.toISOString().split("T")[0],
-          allDay: allDay,
-          color: priorityColors[priority],
-          eventColor: priorityColors[priority],
-        };
-        newTasks.push(newTask);
-      }
-    }
-
-    return newTasks;
-  };
-
   // need a function to add task for calendar
   const addTask = async () => {
-    
     const newTask = {
       title: taskTitle,
-      start: `${taskStartDate}T${taskStartTime}`,
+      start: taskStartDate,
       end: taskEndDate,
       timeStart: `${taskStartTime}`,
       timeEnd: `${taskEndTime}`,
@@ -276,7 +248,7 @@ function Calendar() {
       eventColor: priorityColors[priority],
       userId: userId,
     };
-    console.log("check here:", `${taskStartDate}T${taskStartTime}`)
+    console.log("check here:", taskStartDate);
 
     try {
       if (selectedTask) {
@@ -286,20 +258,18 @@ function Calendar() {
 
         // set tasks to updated tasks, would render the changes of the task.
         const updatedTasks = tasks.map((task) =>
-        
           task.id === selectedTask ? updatedTask : task
         );
         // console.log("is ths updating?:", updatedTask)
         setTasks(updatedTasks);
         // console.log("is ths updating?:", updatedTask)
-
       } else {
         // if else, create that task,
         const createdTask = await createTask(newTask);
-        console.log("Task created:", createdTask);
+        console.log("task created:", createdTask);
 
         // setTasks with the new tasks that has been created.
-        setTasks([...tasks, createdTask, ...generateRepeatedTasks()]);
+        setTasks([...tasks, createdTask]);
       }
 
       // close the form
@@ -310,7 +280,6 @@ function Calendar() {
       setAllDay(false);
       setSelectedTask(null);
       updateTasks();
-
     } catch (error) {
       console.error("Error:", error.message);
     }
@@ -324,6 +293,8 @@ function Calendar() {
   `;
 
   return (
+
+    
     <div style={{ maxWidth: "90vh", margin: "0 auto", paddingTop: "20px" }}>
       <Button
         variant="contained"
@@ -335,6 +306,8 @@ function Calendar() {
       >
         Add Task
       </Button>
+
+      
 
       <Dialog
         open={showForm}
@@ -354,7 +327,7 @@ function Calendar() {
           />
           <div style={{ display: "flex", gap: "10px" }}>
             <TextField
-              type="date"y
+              type="date"
               margin="dense"
               label="Start Date"
               fullWidth
@@ -469,7 +442,7 @@ function Calendar() {
           placeholder="Placeholder"
           multiline
           variant="filled"
-          sx={{ width: "92%", my: 1, ml: 3 }} 
+          sx={{ width: "92%", my: 1, ml: 3 }}
         />
         <DialogActions>
           {/* make a button for deleting a task. make it only appear when a task has existed in the database. */}

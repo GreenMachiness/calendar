@@ -96,7 +96,7 @@ export default function Navbar() {
         setUser(result.data);
       });
     }
-  }, []);
+  }, [isLoggedIn]);
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);

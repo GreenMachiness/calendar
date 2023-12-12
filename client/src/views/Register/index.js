@@ -11,6 +11,7 @@ function Register(props) {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [zipCode, setZipCode] = useState("");
   const [openSuccessSnackbar, setOpenSuccessSnackbar] = useState(false); // need setstate for Success Snackbar
   const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false); // need state for Error Snackbar
 
@@ -21,6 +22,7 @@ function Register(props) {
       lastName,
       email,
       password,
+      zipCode,
     };
 
     try {
@@ -87,6 +89,14 @@ function Register(props) {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+        />
+        {/* zipCode */}
+        <TextField
+          id="zipCode_field"
+          label="Zip Code"
+          variant="filled"
+          value={zipCode}
+          onChange={(e) => setZipCode(e.target.value)}
         />
         {/* register button */}
         <Button variant="contained" onClick={handleClick}>
