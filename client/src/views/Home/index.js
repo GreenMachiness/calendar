@@ -128,8 +128,7 @@ function Calendar() {
     //when testing, make this an empty array, it infinitely loops
     // console.log("tasks:", tasks)
     getAllTasks();
-    // console.log("Tasks after update:", tasks);
-
+    // console.log("tasks after update:", tasks);
   }, []);
 
   const updateTasks = async () => {
@@ -177,7 +176,7 @@ function Calendar() {
   const handleRepetitionUnitChange = (e) => {
     setRepetitionUnit(e.target.value);
   };
-  //full calendar has handle event click on their docs to get data of the task when clicked. 
+  //full calendar has handle event click on their docs to get data of the task when clicked.
   const handleEventClick = async (clickInfo) => {
     //something wrong with the start and end, wrong format.
     const clickedEvent = clickInfo.event;
@@ -207,7 +206,7 @@ function Calendar() {
     setShowForm(true);
     console.log("id:", id);
   };
-//handle delete button.
+  //handle delete button.
   const handleDeleteTask = async (taskId) => {
     try {
       await deleteTask(taskId);
@@ -263,10 +262,9 @@ function Calendar() {
 
   // need a function to add task for calendar
   const addTask = async () => {
-    
     const newTask = {
       title: taskTitle,
-      start: `${taskStartDate}T${taskStartTime}`,
+      start: taskStartDate,
       end: taskEndDate,
       timeStart: `${taskStartTime}`,
       timeEnd: `${taskEndTime}`,
@@ -276,7 +274,7 @@ function Calendar() {
       eventColor: priorityColors[priority],
       userId: userId,
     };
-    console.log("check here:", `${taskStartDate}T${taskStartTime}`)
+    console.log("check here:", taskStartDate);
 
     try {
       if (selectedTask) {
@@ -286,13 +284,11 @@ function Calendar() {
 
         // set tasks to updated tasks, would render the changes of the task.
         const updatedTasks = tasks.map((task) =>
-        
           task.id === selectedTask ? updatedTask : task
         );
         // console.log("is ths updating?:", updatedTask)
         setTasks(updatedTasks);
         // console.log("is ths updating?:", updatedTask)
-
       } else {
         // if else, create that task,
         const createdTask = await createTask(newTask);
@@ -310,7 +306,6 @@ function Calendar() {
       setAllDay(false);
       setSelectedTask(null);
       updateTasks();
-
     } catch (error) {
       console.error("Error:", error.message);
     }
@@ -354,7 +349,7 @@ function Calendar() {
           />
           <div style={{ display: "flex", gap: "10px" }}>
             <TextField
-              type="date"y
+              type="date"
               margin="dense"
               label="Start Date"
               fullWidth
@@ -469,7 +464,7 @@ function Calendar() {
           placeholder="Placeholder"
           multiline
           variant="filled"
-          sx={{ width: "92%", my: 1, ml: 3 }} 
+          sx={{ width: "92%", my: 1, ml: 3 }}
         />
         <DialogActions>
           {/* make a button for deleting a task. make it only appear when a task has existed in the database. */}
