@@ -11,6 +11,7 @@ import Home from './views/Home'
 import NotFound from './views/NotFound'
 import Login from './views/Login'
 import Register from './views/Register'
+import Stopwatch from './views/Stopwatch'
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
             <Route path="/about" element={<About/>}/>
             <Route path="/login" element={<Login/>}/>
             <Route path="/register" element={<Register/>}/>
+            <Route path="/stopwatch" element={<Stopwatch/>}/>
+
             <Route path="*" element={<NotFound/>}/>
           </Route>
         </Routes>
