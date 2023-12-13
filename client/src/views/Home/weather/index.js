@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { fetchMe } from "../../utility/api";
-import { isUserLoggedIn} from "../../utility/utils";
+import { fetchMe } from "../../../utility/api";
+import { isUserLoggedIn} from "../../../utility/utils";
 import { Grid, Paper, Typography } from "@mui/material";
 import weatherCodeData from "./weatherCodeData.json";
 import { getMonthName, getDayOfWeek, addNumSuffix } from "./utils";

@@ -20,6 +20,7 @@ import { createTask } from "../../utility/api";
 import { fetchMe, fetchTasks, updateTask, deleteTask } from "../../utility/api";
 import { isUserLoggedIn, clearToken } from "../../utility/utils";
 import listPlugin from "@fullcalendar/list";
+import Weather from './weather'
 
 function Calendar() {
   // want to get the current date
@@ -303,6 +304,8 @@ function Calendar() {
   `;
 
   return (
+    <div>
+    <Weather/>
     <div style={{ maxWidth: "90vh", margin: "0 auto", paddingTop: "20px" }}>
       <Button
         variant="contained"
@@ -530,6 +533,7 @@ function Calendar() {
           ref={calendarRef}
         />
       </div>
+    </div>
     </div>
   );
 }
