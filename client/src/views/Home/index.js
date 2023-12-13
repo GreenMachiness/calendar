@@ -20,7 +20,8 @@ import { createTask } from "../../utility/api";
 import { fetchMe, fetchTasks, updateTask, deleteTask } from "../../utility/api";
 import { isUserLoggedIn, clearToken } from "../../utility/utils";
 import listPlugin from "@fullcalendar/list";
-import Weather from './weather'
+import Weather from "./weather";
+import rrulePlugin from "@fullcalendar/rrule";
 
 function Calendar() {
   // want to get the current date
@@ -219,7 +220,7 @@ function Calendar() {
     setShowForm(true);
     console.log("id:", id);
   };
-  //handle delete button. 
+  //handle delete button.
   const handleDeleteTask = async (taskId) => {
     try {
       await deleteTask(taskId);
@@ -249,7 +250,7 @@ function Calendar() {
   const addTask = async () => {
     const newTask = {
       title: taskTitle,
-      start:`${taskStartDate}T${taskStartTime}`,
+      start: `${taskStartDate}T${taskStartTime}`,
       end: `${taskEndDate}T${taskEndTime}`,
       timeStart: `${taskStartTime}`,
       timeEnd: `${taskEndTime}`,
@@ -261,6 +262,20 @@ function Calendar() {
     };
     // console.log("check here:", `${taskStartDate}T${taskStartTime}`);
 
+    try {
+      if (notifyValue && notifyUnit) {
+        const notifyTime = calculateTime(
+          parseInt(notifyValue),
+          notifyUnit
+        );
+    
+        
+        scheduleNotification(newTask.title, notifyTime);
+      }
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+    
     try {
       if (selectedTask) {
         // need a way to update a task through ID, using the form of creating a task, we can update it by getting the data of the selected task
@@ -296,6 +311,50 @@ function Calendar() {
     }
   };
 
+  const calculateTime = (value, unit) => {
+    let milliseconds = value;
+  
+    // Convert notify value to milliseconds based on the selected unit
+    switch (unit) {
+      case "minutes":
+        milliseconds *= 60000; // 1 minute = 60,000 milliseconds
+        break;
+      case "hours":
+        milliseconds *= 3600000; // 1 hour = 3,600,000 milliseconds
+        break;
+      case "days":
+        milliseconds *= 86400000; // 1 day = 86,400,000 milliseconds
+        break;
+      case "weeks":
+        milliseconds *= 604800000; // 1 week = 604,800,000 milliseconds
+        break;
+      default:
+        break;
+    }
+  
+    return milliseconds;
+  };
+  
+  // Function to schedule a notification
+  const scheduleNotification = (title, notifyTime) => {
+    if (!("Notification" in window)) {
+      console.error("This browser does not support system notifications");
+      return;
+    }
+  
+    // Request permission to display notifications
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        // Schedule the notification after the specified time
+        setTimeout(() => {
+          new Notification("Task Reminder", {
+            body: `Task "${title}" is due now!`,
+          });
+        }, notifyTime);
+      }
+    });
+  };
+
   // CSS for cursor on calendar
   const clickCursor = `
     .fc-daygrid-day, .fc-timegrid-slot {
@@ -305,236 +364,238 @@ function Calendar() {
 
   return (
     <div>
-    <Weather/>
-    <div style={{ maxWidth: "90vh", margin: "0 auto", paddingTop: "20px" }}>
-      <Button
-        variant="contained"
-        onClick={() => {
-          setShowForm(true);
-          setTaskStartDate(taskStartDate);
-          setTaskEndDate(taskEndDate);
-        }}
-      >
-        Add Task
-      </Button>
+      <Weather />
+      <div style={{ maxWidth: "90vh", margin: "0 auto", paddingTop: "20px" }}>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setShowForm(true);
+            setTaskStartDate(taskStartDate);
+            setTaskEndDate(taskEndDate);
+          }}
+        >
+          Add Task
+        </Button>
 
-      <Dialog
-        open={showForm}
-        TransitionComponent={Slide}
-        onClose={() => setShowForm(false)}
-        transitionDuration={500}
-      >
-        <DialogTitle>Add Task</DialogTitle>
-        <DialogContent>
+        <Dialog
+          open={showForm}
+          TransitionComponent={Slide}
+          onClose={() => setShowForm(false)}
+          transitionDuration={500}
+        >
+          <DialogTitle>Add Task</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Task Title"
+              fullWidth
+              value={taskTitle}
+              onChange={(e) => setTaskTitle(e.target.value)}
+            />
+            <div style={{ display: "flex", gap: "10px" }}>
+              <TextField
+                type="date"
+                margin="dense"
+                label="Start Date"
+                fullWidth
+                value={taskStartDate}
+                onChange={(e) => setTaskStartDate(e.target.value)}
+              />
+              <TextField
+                type="date"
+                margin="dense"
+                label="End Date"
+                fullWidth
+                value={taskEndDate}
+                onChange={(e) => setTaskEndDate(e.target.value)}
+              />
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <TextField
+                type="time"
+                margin="dense"
+                label="Start Time"
+                fullWidth
+                value={taskStartTime}
+                onChange={(e) => setTaskStartTime(e.target.value)}
+                disabled={allDay}
+              />
+              <TextField
+                type="time"
+                margin="dense"
+                label="End Time"
+                fullWidth
+                value={taskEndTime}
+                onChange={(e) => setTaskEndTime(e.target.value)}
+                disabled={allDay}
+              />
+            </div>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={allDay}
+                  onChange={(e) => setAllDay(e.target.checked)}
+                />
+              }
+              label="All-day"
+            />
+            <FormControl fullWidth>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <TextField
+                  type="number"
+                  margin="dense"
+                  label="Repeat Every"
+                  value={repetitionValue}
+                  onChange={handleRepetitionValueChange}
+                  style={{ width: "150px" }}
+                />
+                <Select
+                  value={repetitionUnit}
+                  onChange={handleRepetitionUnitChange}
+                  style={{ marginTop: "8px" }}
+                >
+                  <MenuItem value="days">Days</MenuItem>
+                  <MenuItem value="weeks">Weeks</MenuItem>
+                  <MenuItem value="months">Months</MenuItem>
+                  <MenuItem value="years">Years</MenuItem>
+                </Select>
+              </div>
+            </FormControl>
+            <FormControl fullWidth>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <TextField
+                  type="number"
+                  margin="dense"
+                  label="Notify Me Before"
+                  value={notifyValue}
+                  onChange={handleNotifyValueChange}
+                  style={{ width: "150px" }}
+                />
+                <Select
+                  value={notifyUnit}
+                  onChange={handleNotifyUnitChange}
+                  style={{ marginTop: "8px" }}
+                >
+                  <MenuItem value="minutes">Minutes</MenuItem>
+                  <MenuItem value="hours">Hours</MenuItem>
+                  <MenuItem value="days">Days</MenuItem>
+                  <MenuItem value="days">Weeks</MenuItem>
+                </Select>
+              </div>
+            </FormControl>
+          </DialogContent>
+          <FormControl sx={{ m: 1, ml: 3, mt: 2 }}>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <InputLabel id="demo-simple-select-label">
+                Priority Level
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={priority}
+                label="Priority Level"
+                onChange={handlePriorityChange}
+                sx={{ minWidth: "150px" }}
+              >
+                <MenuItem value="optional">Optional</MenuItem>
+                <MenuItem value="important">Important</MenuItem>
+                <MenuItem value="urgent">Urgent</MenuItem>
+              </Select>
+            </div>
+          </FormControl>
           <TextField
-            autoFocus
-            margin="dense"
-            label="Task Title"
-            fullWidth
-            value={taskTitle}
-            onChange={(e) => setTaskTitle(e.target.value)}
+            id="filled-textarea"
+            label="Notes"
+            placeholder="Placeholder"
+            multiline
+            variant="filled"
+            sx={{ width: "92%", my: 1, ml: 3 }}
           />
-          <div style={{ display: "flex", gap: "10px" }}>
-            <TextField
-              type="date"
-              margin="dense"
-              label="Start Date"
-              fullWidth
-              value={taskStartDate}
-              onChange={(e) => setTaskStartDate(e.target.value)}
-            />
-            <TextField
-              type="date"
-              margin="dense"
-              label="End Date"
-              fullWidth
-              value={taskEndDate}
-              onChange={(e) => setTaskEndDate(e.target.value)}
-            />
-          </div>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <TextField
-              type="time"
-              margin="dense"
-              label="Start Time"
-              fullWidth
-              value={taskStartTime}
-              onChange={(e) => setTaskStartTime(e.target.value)}
-              disabled={allDay}
-            />
-            <TextField
-              type="time"
-              margin="dense"
-              label="End Time"
-              fullWidth
-              value={taskEndTime}
-              onChange={(e) => setTaskEndTime(e.target.value)}
-              disabled={allDay}
-            />
-          </div>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={allDay}
-                onChange={(e) => setAllDay(e.target.checked)}
-              />
-            }
-            label="All-day"
-          />
-          <FormControl fullWidth>
-            <div style={{ display: "flex", gap: "10px" }}>
-              <TextField
-                type="number"
-                margin="dense"
-                label="Repeat Every"
-                value={repetitionValue}
-                onChange={handleRepetitionValueChange}
-                style={{ width: "150px" }}
-              />
-              <Select
-                value={repetitionUnit}
-                onChange={handleRepetitionUnitChange}
-                style={{ marginTop: "8px" }}
+          <DialogActions>
+            {/* make a button for deleting a task. make it only appear when a task has existed in the database. */}
+            {selectedTask && (
+              <Button
+                variant="contained"
+                onClick={() => handleDeleteTask(selectedTask)}
+                style={{ backgroundColor: "red", color: "white" }}
               >
-                <MenuItem value="days">Days</MenuItem>
-                <MenuItem value="weeks">Weeks</MenuItem>
-                <MenuItem value="months">Months</MenuItem>
-                <MenuItem value="years">Years</MenuItem>
-              </Select>
-            </div>
-          </FormControl>
-          <FormControl fullWidth>
-            <div style={{ display: "flex", gap: "10px" }}>
-              <TextField
-                type="number"
-                margin="dense"
-                label="Notify Me Before"
-                value={notifyValue}
-                onChange={handleNotifyValueChange}
-                style={{ width: "150px" }}
-              />
-              <Select
-                value={notifyUnit}
-                onChange={handleNotifyUnitChange}
-                style={{ marginTop: "8px" }}
-              >
-                <MenuItem value="minutes">Minutes</MenuItem>
-                <MenuItem value="hours">Hours</MenuItem>
-                <MenuItem value="days">Days</MenuItem>
-                <MenuItem value="days">Weeks</MenuItem>
-              </Select>
-            </div>
-          </FormControl>
-        </DialogContent>
-        <FormControl sx={{ m: 1, ml: 3, mt: 2 }}>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <InputLabel id="demo-simple-select-label">
-              Priority Level
-            </InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={priority}
-              label="Priority Level"
-              onChange={handlePriorityChange}
-              sx={{ minWidth: "150px" }}
-            >
-              <MenuItem value="optional">Optional</MenuItem>
-              <MenuItem value="important">Important</MenuItem>
-              <MenuItem value="urgent">Urgent</MenuItem>
-            </Select>
-          </div>
-        </FormControl>
-        <TextField
-          id="filled-textarea"
-          label="Notes"
-          placeholder="Placeholder"
-          multiline
-          variant="filled"
-          sx={{ width: "92%", my: 1, ml: 3 }}
-        />
-        <DialogActions>
-          {/* make a button for deleting a task. make it only appear when a task has existed in the database. */}
-          {selectedTask && (
+                Delete Task
+              </Button>
+            )}
             <Button
               variant="contained"
-              onClick={() => handleDeleteTask(selectedTask)}
+              onClick={() => setShowForm(false)}
               style={{ backgroundColor: "red", color: "white" }}
             >
-              Delete Task
+              Cancel
             </Button>
-          )}
-          <Button
-            variant="contained"
-            onClick={() => setShowForm(false)}
-            style={{ backgroundColor: "red", color: "white" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={addTask}
-            style={{ color: "white", background: "green" }}
-          >
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <style>{clickCursor}</style>
-      <div style={{ maxWidth: "90vh", margin: "0 auto", paddingTop: "20px" }}>
-        {/* full calendar import */}
-        <FullCalendar
-          //plugins from Full calendar
-          plugins={[
-            dayGridPlugin,
-            timeGridPlugin,
-            interactionPlugin,
-            listPlugin,
-          ]}
-          //need a button to have a list of all tasks/events.
-          customButtons={{
-            myCustomButton: {
-              text: "View List",
-              click: function () {
-                if (calendarRef.current) {
-                  const calendarApi = calendarRef.current.getApi();
-                  calendarApi.changeView("listYear");
-                }
-              },
-            },
-          }}
-          headerToolbar={{
-            start: "today prev,next",
-            center: "title",
-            end: "dayGridMonth,timeGridWeek,timeGridDay,myCustomButton",
-          }}
-          buttonText={buttonText}
-          timeZone="UTC"
-          initialView="dayGridMonth"
-          events={tasks}
-          dateClick={(info) => openFormOnDate(info.dateStr)}
-          eventClick={handleEventClick}
-          eventContent={(arg) => (
-            <div
-              style={{
-                padding: "2px",
-                backgroundColor: arg.event.backgroundColor,
-                color:
-                  arg.event.backgroundColor === priorityColors.urgent ||
-                  arg.event.backgroundColor === priorityColors.important ||
-                  arg.event.backgroundColor === priorityColors.optional
-                    ? "white"
-                    : "black",
-              }}
+            <Button
+              variant="contained"
+              onClick={addTask}
+              style={{ color: "white", background: "green" }}
             >
-              {arg.timeText && <strong>{arg.timeText.slice(0, 5)}</strong>}
-              <p>{arg.event.title}</p>
-            </div>
-          )}
-          ref={calendarRef}
-        />
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <style>{clickCursor}</style>
+        <div style={{ maxWidth: "90vh", margin: "0 auto", paddingTop: "20px" }}>
+          {/* full calendar import */}
+          <FullCalendar
+            //plugins from Full calendar
+            plugins={[
+              dayGridPlugin,
+              timeGridPlugin,
+              interactionPlugin,
+              listPlugin,
+              rrulePlugin,
+            ]}
+            //need a button to have a list of all tasks/events.
+            customButtons={{
+              myCustomButton: {
+                text: "View List",
+                click: function () {
+                  if (calendarRef.current) {
+                    const calendarApi = calendarRef.current.getApi();
+                    calendarApi.changeView("listYear");
+                  }
+                },
+              },
+            }}
+            headerToolbar={{
+              start: "today prev,next",
+              center: "title",
+              end: "dayGridMonth,timeGridWeek,timeGridDay,myCustomButton",
+            }}
+            buttonText={buttonText}
+            timeZone="UTC"
+            themeSystem="minty"
+            initialView="dayGridMonth"
+            events={tasks}
+            dateClick={(info) => openFormOnDate(info.dateStr)}
+            eventClick={handleEventClick}
+            eventContent={(arg) => (
+              <div
+                style={{
+                  padding: "2px",
+                  backgroundColor: arg.event.backgroundColor,
+                  color:
+                    arg.event.backgroundColor === priorityColors.urgent ||
+                    arg.event.backgroundColor === priorityColors.important ||
+                    arg.event.backgroundColor === priorityColors.optional
+                      ? "white"
+                      : "black",
+                }}
+              >
+                {arg.timeText && <strong>{arg.timeText.slice(0, 5)}</strong>}
+                <p>{arg.event.title}</p>
+              </div>
+            )}
+            ref={calendarRef}
+          />
+        </div>
       </div>
-    </div>
     </div>
   );
 }

@@ -213,13 +213,13 @@ export const fetchTasks = async () => {
   return responseData;
 };
 
-export const fetchTaskDetails = async (title, date) => {
+export const fetchNotifications = async () => {
   const token = getToken();
   if (!token) {
     throw new Error(`Missing User Token`);
   }
 
-  const response = await fetch(`${baseUrl}/tasks?title=${title}&date=${date}`, {
+  const response = await fetch(`${baseUrl}/notifications`, {
     method: "GET",
     headers: new Headers({
       Authorization: `Bearer ${token}`, 
@@ -234,3 +234,4 @@ export const fetchTaskDetails = async (title, date) => {
 
   return responseData;
 };
+
