@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -19,6 +19,7 @@ import FormControl from "@mui/material/FormControl";
 import { createTask } from "../../utility/api";
 import { fetchMe, fetchTasks, updateTask, deleteTask } from "../../utility/api";
 import { isUserLoggedIn, clearToken } from "../../utility/utils";
+import listPlugin from "@fullcalendar/list";
 
 function Calendar() {
   // want to get the current date
@@ -48,7 +49,16 @@ function Calendar() {
     important: "green",
     urgent: "red",
   };
+  // make Buttons capitalized
+  const calendarRef = useRef(null);
 
+  const buttonText = {
+    today: "Today",
+    month: "Month",
+    week: "Week",
+    day: "Day",
+    list: "List",
+  };
   // need tasks to render into my calendar to see if it works
   const [tasks, setTasks] = useState([]);
 
@@ -130,7 +140,7 @@ function Calendar() {
     getAllTasks();
     // console.log("tasks after update:", tasks);
   }, []);
-  //need to re-render the my tasks to reflect my database. 
+  //need to re-render the my tasks to reflect my database.
   const updateTasks = async () => {
     try {
       //maybe fetch tasks again from the database. whichever is not there or is updated would re-render the app
@@ -293,8 +303,6 @@ function Calendar() {
   `;
 
   return (
-
-    
     <div style={{ maxWidth: "90vh", margin: "0 auto", paddingTop: "20px" }}>
       <Button
         variant="contained"
@@ -306,8 +314,6 @@ function Calendar() {
       >
         Add Task
       </Button>
-
-      
 
       <Dialog
         open={showForm}
@@ -465,7 +471,7 @@ function Calendar() {
           <Button
             variant="contained"
             onClick={addTask}
-            style={{ color: "white" }}
+            style={{ color: "white", background: "green" }}
           >
             Save
           </Button>
@@ -475,13 +481,32 @@ function Calendar() {
       <div style={{ maxWidth: "90vh", margin: "0 auto", paddingTop: "20px" }}>
         {/* full calendar import */}
         <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
+          //plugins from Full calendar
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            interactionPlugin,
+            listPlugin,
+          ]}
+          //need a button to have a list of all tasks/events.
+          customButtons={{
+            myCustomButton: {
+              text: "View List",
+              click: function () {
+                if (calendarRef.current) {
+                  const calendarApi = calendarRef.current.getApi();
+                  calendarApi.changeView("listYear");
+                }
+              },
+            },
+          }}
           headerToolbar={{
             start: "today prev,next",
             center: "title",
-            end: "dayGridMonth,timeGridWeek,timeGridDay",
+            end: "dayGridMonth,timeGridWeek,timeGridDay,myCustomButton",
           }}
+          buttonText={buttonText}
+          initialView="dayGridMonth"
           events={tasks}
           dateClick={(info) => openFormOnDate(info.dateStr)}
           eventClick={handleEventClick}
@@ -502,6 +527,7 @@ function Calendar() {
               <p>{arg.event.title}</p>
             </div>
           )}
+          ref={calendarRef}
         />
       </div>
     </div>
