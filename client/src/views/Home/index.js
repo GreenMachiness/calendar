@@ -72,7 +72,7 @@ function Calendar() {
   // hooks for that task date
   const [taskStartDate, setTaskStartDate] = useState(null);
   const [taskEndDate, setTaskEndDate] = useState(null);
-  const [allDay, setAllDay] = useState(true);
+  const [allDay, setAllDay] = useState(false);
   const [taskStartTime, setTaskStartTime] = useState(
     currentHour.toTimeString().slice(0, 5) //set initial render to the next hour rounded up
   );
@@ -219,7 +219,7 @@ function Calendar() {
     setShowForm(true);
     console.log("id:", id);
   };
-  //handle delete button.
+  //handle delete button. 
   const handleDeleteTask = async (taskId) => {
     try {
       await deleteTask(taskId);
@@ -249,8 +249,8 @@ function Calendar() {
   const addTask = async () => {
     const newTask = {
       title: taskTitle,
-      start: taskStartDate,
-      end: taskEndDate,
+      start:`${taskStartDate}T${taskStartTime}`,
+      end: `${taskEndDate}T${taskEndTime}`,
       timeStart: `${taskStartTime}`,
       timeEnd: `${taskEndTime}`,
       allDay: allDay,
@@ -259,7 +259,7 @@ function Calendar() {
       eventColor: priorityColors[priority],
       userId: userId,
     };
-    console.log("check here:", taskStartDate);
+    // console.log("check here:", `${taskStartDate}T${taskStartTime}`);
 
     try {
       if (selectedTask) {
@@ -509,6 +509,7 @@ function Calendar() {
             end: "dayGridMonth,timeGridWeek,timeGridDay,myCustomButton",
           }}
           buttonText={buttonText}
+          timeZone="UTC"
           initialView="dayGridMonth"
           events={tasks}
           dateClick={(info) => openFormOnDate(info.dateStr)}
