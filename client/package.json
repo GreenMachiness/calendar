@@ -10,6 +10,7 @@
     "@fullcalendar/interaction": "^6.1.10",
     "@fullcalendar/list": "^6.1.10",
     "@fullcalendar/react": "^6.1.10",
+    "@fullcalendar/rrule": "^6.1.10",
     "@fullcalendar/timegrid": "^6.1.10",
     "@mui/icons-material": "^5.14.19",
     "@mui/material": "^5.15.0",
