@@ -263,20 +263,6 @@ function Calendar() {
     // console.log("check here:", `${taskStartDate}T${taskStartTime}`);
 
     try {
-      if (notifyValue && notifyUnit) {
-        const notifyTime = calculateTime(
-          parseInt(notifyValue),
-          notifyUnit
-        );
-    
-        
-        scheduleNotification(newTask.title, notifyTime);
-      }
-    } catch (error) {
-      console.error("Error:", error.message);
-    }
-    
-    try {
       if (selectedTask) {
         // need a way to update a task through ID, using the form of creating a task, we can update it by getting the data of the selected task
         const updatedTask = await updateTask(selectedTask, newTask);
@@ -309,50 +295,6 @@ function Calendar() {
     } catch (error) {
       console.error("Error:", error.message);
     }
-  };
-
-  const calculateTime = (value, unit) => {
-    let milliseconds = value;
-  
-    // Convert notify value to milliseconds based on the selected unit
-    switch (unit) {
-      case "minutes":
-        milliseconds *= 60000; // 1 minute = 60,000 milliseconds
-        break;
-      case "hours":
-        milliseconds *= 3600000; // 1 hour = 3,600,000 milliseconds
-        break;
-      case "days":
-        milliseconds *= 86400000; // 1 day = 86,400,000 milliseconds
-        break;
-      case "weeks":
-        milliseconds *= 604800000; // 1 week = 604,800,000 milliseconds
-        break;
-      default:
-        break;
-    }
-  
-    return milliseconds;
-  };
-  
-  // Function to schedule a notification
-  const scheduleNotification = (title, notifyTime) => {
-    if (!("Notification" in window)) {
-      console.error("This browser does not support system notifications");
-      return;
-    }
-  
-    // Request permission to display notifications
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") {
-        // Schedule the notification after the specified time
-        setTimeout(() => {
-          new Notification("Task Reminder", {
-            body: `Task "${title}" is due now!`,
-          });
-        }, notifyTime);
-      }
-    });
   };
 
   // CSS for cursor on calendar
@@ -549,7 +491,6 @@ function Calendar() {
               timeGridPlugin,
               interactionPlugin,
               listPlugin,
-              rrulePlugin,
             ]}
             //need a button to have a list of all tasks/events.
             customButtons={{
@@ -570,7 +511,6 @@ function Calendar() {
             }}
             buttonText={buttonText}
             timeZone="UTC"
-            themeSystem="minty"
             initialView="dayGridMonth"
             events={tasks}
             dateClick={(info) => openFormOnDate(info.dateStr)}
