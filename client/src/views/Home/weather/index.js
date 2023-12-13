@@ -150,7 +150,7 @@ function Weather(props) {
               style={{
                 margin: "10px",
                 padding: "20px",
-                height: "375px",
+                minHeight: "275px",
                 borderRadius: "30px",
                 backgroundColor: "#1e2b37",
                 color: "white",

@@ -6,8 +6,8 @@ exports.up = function(knex) {
     return knex.schema.createTable('tasks', function(table) {
         table.increments('id');
         table.string('title').notNullable();
-        table.date('start').notNullable();
-        table.date('end').notNullable();
+        table.datetime('start').notNullable();
+        table.datetime('end').notNullable();
         table.time('timeStart')
         table.time('timeEnd')
         table.boolean('allDay')
