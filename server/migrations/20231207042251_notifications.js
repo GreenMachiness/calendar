@@ -3,10 +3,10 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-    return knex.schema.createTable('notification', function(table) {
+    return knex.schema.createTable('notifications', function(table) {
         table.increments('id');
         table.integer('duration').notNullable();
-        table.enu('unit', ['days', 'weeks', 'months', "years"]).notNullable();
+        table.enu('unit', ['minutes', 'hours', 'days', "weeks"]).notNullable();
         table.integer('taskId').references('id').inTable('tasks').notNullable().onDelete('CASCADE')
         table.timestamps(['true'], ['true'], ['true'])
 
@@ -14,5 +14,5 @@ exports.up = function(knex) {
     }
     
     exports.down = function(knex) {
-      return knex.schema.dropTable('notification');
+      return knex.schema.dropTable('notifications');
     }

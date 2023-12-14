@@ -17,7 +17,7 @@ import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import { createTask } from "../../utility/api";
-import { fetchMe, fetchTasks, updateTask, deleteTask } from "../../utility/api";
+import { fetchMe, fetchTasks, updateTask, deleteTask, createNotification, updateNotification, deleteNotification  } from "../../utility/api";
 import { isUserLoggedIn, clearToken } from "../../utility/utils";
 import listPlugin from "@fullcalendar/list";
 import Weather from "./weather";
@@ -205,7 +205,7 @@ function Calendar() {
     setTaskEndDate(formattedEndDate);
     setAllDay(allDay);
     //cant get priority level, clickInfo.event from full calendar doesnt have priority level, they do have colors. Assign colors with a priority level, giving us a priority level we can set
-    const priorityMap = {
+    const priorityColor = {
       green: "important",
       red: "urgent",
       blue: "optional",
@@ -213,7 +213,7 @@ function Calendar() {
 
     // console.log("get ID:", clickedEvent)
 
-    const selectedPriority = priorityMap[borderColor];
+    const selectedPriority = priorityColor[borderColor];
 
     setPriority(selectedPriority);
     setSelectedTask(id);
@@ -260,7 +260,7 @@ function Calendar() {
       eventColor: priorityColors[priority],
       userId: userId,
     };
-    // console.log("check here:", `${taskStartDate}T${taskStartTime}`);
+    // console.log("check here:", newtask);
 
     try {
       if (selectedTask) {
@@ -282,7 +282,16 @@ function Calendar() {
 
         // setTasks with the new tasks that has been created.
         setTasks([...tasks, createdTask]);
+        const notificationData = {
+          duration: notifyValue,
+          unit: notifyUnit,
+          taskId: createdTask.data.id,
+        };
+        console.log("check here:", createdTask)
+  
+        await createNotification(notificationData);
       }
+  
 
       // close the form
       setShowForm(false);
@@ -292,6 +301,7 @@ function Calendar() {
       setAllDay(false);
       setSelectedTask(null);
       updateTasks();
+
     } catch (error) {
       console.error("Error:", error.message);
     }
@@ -422,7 +432,7 @@ function Calendar() {
                   <MenuItem value="minutes">Minutes</MenuItem>
                   <MenuItem value="hours">Hours</MenuItem>
                   <MenuItem value="days">Days</MenuItem>
-                  <MenuItem value="days">Weeks</MenuItem>
+                  <MenuItem value="weeks">Weeks</MenuItem>
                 </Select>
               </div>
             </FormControl>
@@ -518,7 +528,6 @@ function Calendar() {
             eventContent={(arg) => (
               <div
                 style={{
-                  padding: "2px",
                   backgroundColor: arg.event.backgroundColor,
                   color:
                     arg.event.backgroundColor === priorityColors.urgent ||
