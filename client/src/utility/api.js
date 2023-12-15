@@ -246,3 +246,82 @@ export const fetchNotifications = async () => {
 
   return responseData;
 };
+
+export const createNotification = async (notificationData) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error(`Missing User Token`);
+  }
+
+  const response = await fetch(`${baseUrl}/notifications`, {
+    method: "POST",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify(notificationData),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      `Status Code: ${response?.status} - ${responseData?.message}`
+    );
+  }
+
+  return responseData;
+};
+
+export const updateNotification = async (
+  notificationId,
+  updatedNotificationData
+) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error(`Missing User Token`);
+  }
+
+  const response = await fetch(`${baseUrl}/notifications/${notificationId}`, {
+    method: "PUT",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify(updatedNotificationData),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      `Status Code: ${response?.status} - ${responseData?.message}`
+    );
+  }
+
+  return responseData;
+};
+
+export const deleteNotification = async (notificationId) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error(`Missing User Token`);
+  }
+
+  const response = await fetch(`${baseUrl}/notifications/${notificationId}`, {
+    method: "DELETE",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
+    }),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      `Status Code: ${response?.status} - ${responseData?.message}`
+    );
+  }
+
+  return responseData;
+};
