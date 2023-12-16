@@ -156,12 +156,12 @@ function Weather(props) {
                 color: "white",
               }}
             >
-              <Typography variant="h6">{formattedDate}</Typography>
+              <Typography variant="h5">{formattedDate}</Typography>
               <img src={weatherDayImage} alt="Weather Icon" />
               {/* <img src={weatherNightImage} alt="Weather Icon" /> */}
-              <Typography>{`Weather: ${weatherDescription}`}</Typography>
-              <Typography>{`High: ${day.temp.high}`}</Typography>
-              <Typography>{`Low: ${day.temp.low}`}</Typography>
+              {/* <Typography>{`Weather: ${weatherDescription}`}</Typography> */}
+              <Typography variant="h6">{`${day.temp.high}°F`}</Typography>
+              {/* <Typography>{`Low: ${day.temp.low}`}</Typography> */}
             </Paper>
           </Grid>
         );
