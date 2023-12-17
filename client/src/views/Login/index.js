@@ -10,6 +10,10 @@ import MuiAlert from "@mui/material/Alert";
 import Slide from "@mui/material/Slide";
 import { login } from "../../utility/api";
 import { setToken } from "../../utility/utils";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -18,7 +22,7 @@ function Login() {
   const [openSnackbar, setOpenSnackbar] = useState(false); // state for success snackbar
   const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false); // state for error snackbar
   const navigate = useNavigate(); // hook for navigation
-
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSnackbarClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -83,14 +87,25 @@ function Login() {
           type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          sx={{ width: '100%' }}
         />
         <TextField
-          id="login-password"
+          id="password_field"
           label="Password"
           variant="filled"
-          type="password"
+          type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: '100%' }} 
         />
         <Button variant="contained" onClick={handleClick}>
           Login
